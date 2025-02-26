@@ -1,0 +1,10 @@
+<div class="header">
+    <ol>
+        <li *ngFor="let path of paths" (click)="pathClicked(path)">{{ path.name }}</li>
+    </ol>
+    <ol class="right-options">
+        <li *ngIf="showNewFolder" (click)="newFolder()">new folder</li>
+        <li *ngIf="showUpload" (click)="upload()">upload</li>
+        <li (click)="logout()">logout</li>
+    </ol>
+</div>

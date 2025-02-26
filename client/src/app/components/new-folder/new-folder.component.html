@@ -1,0 +1,9 @@
+<div class="new-folder" (click)="onBackgroundClick($event)">
+    <div class="dialog" (click)="onDialogClick($event)">
+        <div class="content">
+            <label>Folder Name:</label> 
+            <input #foldername autofocus (keydown)="onKeyDown($event)" /> 
+            <button (click)="onClick()">Go</button>
+        </div>
+    </div>
+</div>

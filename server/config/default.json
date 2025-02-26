@@ -1,0 +1,47 @@
+{
+    "clientOrigins": [
+        "${CLIENT_ORIGINS}"
+    ],
+    "deleteSourceFilesAfterProcessing": true,
+    "folders": {
+        "workingFolder": "working",
+        "inputFolder": "media/input",
+        "outputFolder": "media/output",
+        "uploadsFolder": "media/uploads"
+    },
+    "thumbnails": {
+        "path": "media/thumbnails",
+        "ext": "png",
+        "numberToCapture": 100,
+        "maxWidth": 200,
+        "maxHeight": 200,
+        "routeSuffix": "y"
+    },
+    "fileTestPatterns": {
+		"image": "\\.(jpe?g|png|gif|bmp)$",
+		"video": "\\.(avi|wmv|mp4|m4v|mpg|mkv|mov|flv)$",
+		"avoid": "\\.(db|zip|txt|url)$"
+	},
+    "images": {
+        "routeSuffix": "z"
+    },
+    "video": {
+        "routeSuffix": "x",
+        "convertedExt": "mp4",
+        "workingExt": "wrk",
+        "handbrakeParamters": {
+            "quality": 22,
+            "optimize": true,
+            "two-pass": true,
+            "encoder": "x264",
+            "encopts": "level=4.1:ref=4:b-adapt=2:direct=auto:me=hex:subq=7:rc-lookahead=30:psy-rd=1.0,0.15:deblock=-1,-1:vbv-bufsize=20000:vbv-maxrate=25000:slices=4"
+        }
+    },
+    "users": [
+        {
+            "id": "1",
+            "username": "_",
+            "phrase": "spice"
+        }
+    ]
+}

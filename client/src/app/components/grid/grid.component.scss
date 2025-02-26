@@ -1,0 +1,16 @@
+.container {
+    margin: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
+}
+
+.column {
+    width: 200px;
+    margin-right: 10px;
+}
+
+.listing-item {
+    margin-bottom: 10px;
+}

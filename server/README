@@ -1,0 +1,7 @@
+Node v16+
+
+Create /media folder. Within it, an /input folder with all content to be converted.
+
+to connect to Peach use this:
+
+sudo mount -t cifs -o rw,vers=3.0,credentials=/home/astigmatism/.credentials,dir_mode=0777,file_mode=0777 //192.168.1.2/home/expressjs-videobrowser-server/input /home/astigmatism/expressjs-videobrowser-server/media/input

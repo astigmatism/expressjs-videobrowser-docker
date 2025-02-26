@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: video-browser-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # ✅ RESTORE THIS LINE!
+    volumes:
+      - media_storage:/app/media # Store media inside Docker's volume
+    environment:
+      - NODE_ENV=production
+      - CLIENT_ORIGINS=http://localhost:8080,http://your-production-domain.com
+    networks:
+      - internal_network
+
+  client:
+    container_name: video-browser-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - internal_network
+
+volumes:
+  media_storage:
+
+networks:
+  internal_network:
+    driver: bridge

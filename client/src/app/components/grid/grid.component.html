@@ -1,0 +1,27 @@
+<div #container class="container">
+    <ng-container *ngFor="let bucket of bucketedListingItems">
+        <div class="column">
+            <ng-container *ngFor="let listingItem of bucket">
+                <div class="listing-item">
+                    <app-grid-folder 
+                        *ngIf="isFolderListing(listingItem)"
+                        [listingItem]="listingItem"
+                        (onFolderClick)="folderClicked($event)"
+                        (onDeleteRequest)="deleteRequest($event)"
+                    ></app-grid-folder>
+                    <app-grid-video 
+                        *ngIf="isVideoListing(listingItem)" 
+                        [listingItem]="listingItem"
+                        (onDeleteRequest)="deleteRequest($event)"
+                    ></app-grid-video>
+                    <app-grid-image 
+                        *ngIf="isImageListing(listingItem)" 
+                        [listingItem]="listingItem"
+                        (onImageClick)="imageClicked($event)"
+                        (onDeleteRequest)="deleteRequest($event)"
+                    ></app-grid-image>
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+</div>

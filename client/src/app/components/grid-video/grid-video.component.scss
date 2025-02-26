@@ -1,0 +1,68 @@
+div.grid-item {
+
+    width: 200px;
+
+    .preview {
+        position: relative;
+        cursor: pointer;
+        transition: max-height 0.5s ease-in;
+
+        .resolution-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            cursor: pointer;
+
+            background-color: black;
+            color: white;
+            font-size: 10px;
+            padding: 0 5px;
+            border-radius: 5px;
+        }
+
+        .r480 {
+            background-color: darkgreen;
+        }
+        .r720 {
+            background-color: darkcyan;
+        }
+        .r1080 {
+            background-color: darkblue;
+        }
+        .r4k {
+            background-color: darkmagenta;
+        }
+
+        .delete::after {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            color: red;
+            content: '\00d7'; /* This will render the 'X' */
+        }
+    }
+
+    .video-wrapper {
+
+        position: relative;
+    }
+
+    .grid-item-footer {
+
+        cursor: pointer;
+
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#866ef2+0,7354ee+50,6136f0+51,5e1ede+100 */
+        background: rgb(134,110,242); /* Old browsers */
+        background: -moz-linear-gradient(top,  rgba(134,110,242,1) 0%, rgba(115,84,238,1) 50%, rgba(97,54,240,1) 51%, rgba(94,30,222,1) 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top,  rgba(134,110,242,1) 0%,rgba(115,84,238,1) 50%,rgba(97,54,240,1) 51%,rgba(94,30,222,1) 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom,  rgba(134,110,242,1) 0%,rgba(115,84,238,1) 50%,rgba(97,54,240,1) 51%,rgba(94,30,222,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#866ef2', endColorstr='#5e1ede',GradientType=0 ); /* IE6-9 */
+
+        .name {
+            width: 75%;
+        }
+    }
+}

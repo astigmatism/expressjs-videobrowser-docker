@@ -1,0 +1,55 @@
+ <div class="grid-item">
+    <div 
+        [hidden]="videoPlaying"
+        class="preview"
+        [ngStyle]="{ 
+            'background-image': 'url(\'' + previewImageUrl + '\')',
+            'width.px': video.thumbnail.width > 0 ? video.thumbnail.width : 200,
+            'height.px': video.thumbnail.height > 0 ? video.thumbnail.height : 200,
+            'background-position-x.px': backgroundPositionX * -1,
+            'background-position-y.px': backgroundPositionY * -1,
+            'maxHeight.px': maxHeight
+        }"
+        (mousemove)="onMouseMove($event)"
+        (mouseover)="onMouseOver($event)"
+        (mouseout)="onMouseOut($event)"
+        (click)="onPreviewClick($event)"
+    >
+        <div 
+            [hidden]="scrubbingEnabledForThumbnail || scrubbingEnabledForPlay"
+            [class]="'resolution-badge r' + video.resolutionClass"
+            (click)="onBadgeClick($event)"
+        >{{ video.resolutionClass }}</div>
+
+        <div *ngIf="canDelete" [hidden]="!canShowDeleteIcon()" class="delete" (click)="deleteRequest($event)"></div>
+    </div>
+    <div class="video-wrapper" [hidden]="!videoPlaying" [style.maxHeight.px]="video.thumbnail.height">
+        <video 
+            #videoElement
+            
+            [src]="videoUrl"
+            [width]="video.thumbnail.width"
+            [height]="video.thumbnail.height"
+            preload="metadata"
+            type="video/mp4"
+            (keydown)="onKeyDown($event)"
+            controls
+        >
+        </video>
+        <app-video-caption [message]="videoCaption"></app-video-caption>
+    </div>
+
+    <div class="grid-item-footer" (click)="onFooterClick($event)">
+        <ng-container *ngIf="!scrubbingEnabledForThumbnail && !scrubbingEnabledForPlay">
+            <span class="name">{{ video.name }}</span>
+            <span>{{ duration }}</span>
+        </ng-container>
+        <ng-container *ngIf="scrubbingEnabledForThumbnail">
+            Scrubbing: Click to set thumbnail
+        </ng-container>
+        <ng-container *ngIf="scrubbingEnabledForPlay">
+            Scrubbing: Click to begin play
+        </ng-container>
+            
+    </div>
+ </div>

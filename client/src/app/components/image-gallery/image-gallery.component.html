@@ -1,0 +1,30 @@
+<div class="image-gallery">
+    <div 
+        class="image"
+        [ngStyle]="{ 
+            'background-image': 'url(\'' + imageUrl + '\')',
+            'transform': 'scale(' + imageScale + ')',
+            'background-position-x.%': imagePositionPercentageX,
+            'background-position-y.%': imagePositionPercentageY
+        }"
+    ></div>
+    <div class="controls" [hidden]="hideControls">
+        <div *ngIf="showImageLegend" class="legend">
+            <ul>
+                <li>Right: Next Image</li>
+                <li>Left: Previous Image</li>
+                <li>Space: Stop/Start Slideshow</li>
+                <li>Up: Speedup Slideshow</li>
+                <li>Down: Slowdown Slideshow</li>
+                <li>Q: Quit Gallery View</li>
+                <li>Esc: Panic!</li>
+            </ul>
+        </div>
+        <div class="close-button noselect" (click)="closeGallery()">&#215;</div>
+        <div class="navigation-button left-button noselect" (click)="navigationLeftClicked()">&laquo;</div>
+        <div class="navigation-button right-button noselect" (click)="navigationRightClicked()">&raquo;</div>
+        <div class="slideshow-button noselect" ngClass="slideShowActive ? on : off" (click)="toggleSlideShow()">
+            {{ slideShowActive ? 'Stop Slideshow' : 'Start Slideshow'}} ({{ slideShowIntervalInMilliseconds/1000 }}s)
+        </div>
+    </div>
+</div>

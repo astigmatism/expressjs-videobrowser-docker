@@ -1,0 +1,32 @@
+div.grid-item {
+
+    width: 200px;
+
+    .preview {
+        transition: max-height 0.5s ease-in;
+        cursor: pointer;
+        position: relative;
+
+        .delete::after {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            width: 20px;
+            height: 20px;
+            font-size: 20px;
+            color: red;
+            content: '\00d7'; /* This will render the 'X' */
+        }
+    }
+
+    .grid-item-footer {
+
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e95515+0,d35115+50,c54f0f+51,a05416+100 */
+    background: rgb(233,85,21); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(233,85,21,1) 0%, rgba(211,81,21,1) 50%, rgba(197,79,15,1) 51%, rgba(160,84,22,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e95515', endColorstr='#a05416',GradientType=0 ); /* IE6-9 */
+
+    }
+}

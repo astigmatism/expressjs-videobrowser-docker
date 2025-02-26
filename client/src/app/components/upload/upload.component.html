@@ -1,0 +1,7 @@
+<div class="upload" (click)="onBackgroundClick($event)">
+    <div class="dialog" (click)="onDialogClick($event)">
+        <div class="content">
+            <input #upload autofocus type="file" name="file" multiple (change)="onFilesSelected($event)"/>
+        </div>
+    </div>
+</div>

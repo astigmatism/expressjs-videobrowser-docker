@@ -1,0 +1,41 @@
+.header {
+    width: 100%;
+    color: white;
+    height: 50px;
+    line-height: 50px;
+    margin-bottom: 20px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#1e5799+0,2989d8+50,207cca+51,7db9e8+100;Blue+Gloss+Default */
+    background: #1e5799; /* Old browsers */
+    background: -moz-linear-gradient(top,  #1e5799 0%, #2989d8 50%, #207cca 51%, #7db9e8 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
+
+    
+    ol {
+        list-style-type: none;
+        padding: 0px;
+        margin: 0px 20px;
+
+        li {
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 20px;
+        }
+    }
+
+    .right-options {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+
+        li {
+            margin: 0 0 0 20px;
+        }
+    }
+}

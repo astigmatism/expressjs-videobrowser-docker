@@ -1,0 +1,18 @@
+<div class="grid-item">
+    <div
+        class="preview"
+        [ngStyle]="{ 
+            'background-image': 'url(\'' + thumbnailUrl + '\')',
+            'width.px': image.thumbnail.width,
+            'height.px': image.thumbnail.height
+        }"
+        (mouseover)="onMouseOver($event)"
+        (mouseout)="onMouseOut($event)"
+        (click)="onClick($event)"
+    >
+        <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)"></div>
+    </div>
+    <div class="grid-item-footer">
+        {{ image.name }}
+    </div>
+ </div>

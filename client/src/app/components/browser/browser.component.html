@@ -1,0 +1,39 @@
+<div *ngIf="listing; else loading">
+    <app-header 
+        [path]="listing.path"
+        (onPathClicked)="pathClicked($event)"
+        (onLogoutClicked)="logout()"
+        (onUploadClicked)="upload()"
+        (onNewFolderClicked)="newFolder()"
+    ></app-header>
+    <app-grid 
+        [listing]="listing"
+        (onFolderClick)="folderClicked($event)"
+        (onImageClick)="imageClicked($event)"
+        (onDeleteRequest)="onDeleteRequest($event)"
+    >
+    </app-grid>
+    <app-footer *ngIf="showFooter" [initialMessage]="initialServerState.log"></app-footer>
+    <app-image-gallery *ngIf="galleryActive"
+        [path]="listing.path" 
+        [images]="listing.images"
+        [showImage]="imageToOpenGallery"
+        (closeGalleryRequest)="onGalleryClose()"
+    ></app-image-gallery>
+    <app-upload *ngIf="uploadDialogActive"
+        [path]="listing.path"
+        (closeUploadRequest)="onUploadClose()"
+    ></app-upload>
+    <app-new-folder *ngIf="newFolderDialogActive"
+        (onNewFolderRequest)="onNewFolderRequest($event)"
+        (closeNewFolderRequest)="onNewFolderClose()"
+    ></app-new-folder>
+</div>
+<ng-template #loading>
+    <div class="loading">
+        <div class="lds-heart">
+            <div></div>
+        </div>
+        <div class="caption">Loading</div>
+    </div>
+</ng-template>

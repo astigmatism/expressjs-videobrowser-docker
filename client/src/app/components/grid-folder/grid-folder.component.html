@@ -1,0 +1,4 @@
+<div class="grid-folder" (click)="folderClicked(folder)" (mouseover)="mouseOver = true" (mouseout)="mouseOver = false">
+    <div class="title">{{ folder.name }}</div>
+    <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)"></div>
+</div>

@@ -1,0 +1,56 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories (Angular & Express)
+client/node_modules/
+server/node_modules/
+
+# Angular build output
+client/dist/
+client/.angular/
+
+# Express.js build artifacts
+server/build/
+server/dist/
+*.tsbuildinfo
+
+# Environment & configuration files
+# client/src/environments/
+# server/.env
+# server/config/local.json
+# server/config/development.json
+# server/config/production.json
+
+# Temporary files
+*.bak
+*.swp
+*.swo
+*.swn
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# Coverage reports
+coverage/
+server/coverage/
+client/coverage/
+
+# TypeScript compilation files
+*.tsbuildinfo
+
+# Miscellaneous
+*.bak
+*.tmp
