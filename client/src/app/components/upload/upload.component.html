@@ -2,6 +2,13 @@
     <div class="dialog" (click)="onDialogClick($event)">
         <div class="content">
             <input #upload autofocus type="file" name="file" multiple (change)="onFilesSelected($event)"/>
+            <button class="cancel-btn" (click)="cancelUpload()">Cancel</button>
+        </div>
+
+        <!-- Progress Bar UI -->
+        <div *ngIf="uploading" class="progress-container">
+            <div class="progress-bar" [style.width.%]="uploadProgress"></div>
+            <p>Uploading: {{ uploadProgress }}% ({{ uploadedBytes | number }} / {{ totalBytes | number }} bytes)</p>
         </div>
     </div>
 </div>

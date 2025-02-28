@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Outp
 import { environment } from 'src/environments/environment';
 import { Folder, IFolder } from 'src/models/folder';
 import { IListing } from 'src/models/listing';
-import { IListingItem, IListingItemDeleteRequest, ListingItem } from 'src/models/listing-item';
+import { IListingItem, IListingItemDeleteRequest, IListingItemMoveRequest, ListingItem } from 'src/models/listing-item';
 import { Video } from 'src/models/video';
 import { IImage, Image } from 'src/models/image';
 import { Subscription } from 'rxjs';
@@ -16,9 +16,12 @@ import { OnDestroy } from '@angular/core';
 export class GridComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @Input() listing!: IListing;
+    @Input() movedItem: IListingItemMoveRequest | null = null;
     @Output() onFolderClick = new EventEmitter<IFolder>();
     @Output() onImageClick = new EventEmitter<IImage>();
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
+    @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
+    @Output() onMoveCompleted = new EventEmitter<IListingItemMoveRequest>();
     @ViewChild('container') container!: ElementRef;
     
     public columns = 0;
@@ -41,6 +44,27 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy {
         this.buildListitemBuckets();
     }
 
+    ngOnChanges(): void {
+        if (this.movedItem) {
+            console.log(`🗑 Removing moved item from grid: ${this.movedItem.name}`);
+    
+            // Remove from folders
+            this.listing.folders = this.listing.folders.filter(folder => folder.name !== this.movedItem!.name);
+    
+            // Remove from images
+            this.listing.images = this.listing.images.filter(image => image.name !== this.movedItem!.name);
+    
+            // Remove from videos
+            this.listing.videos = this.listing.videos.filter(video => video.name !== this.movedItem!.name);
+    
+            // Emit event to notify parent component
+            this.onMoveCompleted.emit(this.movedItem);
+    
+            // Rebuild grid
+            this.buildListitemBuckets();
+        }
+    }
+
     folderClicked(folder: IFolder): void {
         this.onFolderClick.emit(folder);
     }
@@ -51,6 +75,10 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy {
 
     deleteRequest(request: IListingItemDeleteRequest): void {
         this.onDeleteRequest.emit(request);
+    }
+
+    moveRequest(request: IListingItemMoveRequest): void {
+        this.onMoveRequest.emit(request);
     }
 
     isFolderListing(listingItem: IListingItem): boolean {

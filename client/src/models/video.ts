@@ -26,6 +26,7 @@ export class Video implements IVideo {
     spriteSheet: ISpriteSheet;
     url: string;
     resolutionClass: VideoResolutionClass;
+    logicalPath: string;
 
     constructor(video: IVideo) {
         this.name = video.name;
@@ -35,6 +36,7 @@ export class Video implements IVideo {
         this.thumbnail = video.thumbnail;
         this.spriteSheet = video.spriteSheet;
         this.resolutionClass = Video.getResolutionClass(this.probe.height);
+        this.logicalPath = video.logicalPath;
     }
 
     static isVideo(listingItem: IListingItem): boolean {

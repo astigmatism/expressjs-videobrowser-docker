@@ -3,6 +3,7 @@ import { HttpService } from 'src/app/services/http/http.service';
 import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
 import { IListing } from 'src/models/listing';
+import { IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
 import { Message, MessageType } from 'src/models/websockets';
 
@@ -22,6 +23,7 @@ export class HeaderComponent implements OnInit {
     @Output() onLogoutClicked = new EventEmitter<Path>();
     @Output() onUploadClicked = new EventEmitter<Path>();
     @Output() onNewFolderClicked = new EventEmitter<Path>();
+    @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
 
     public paths: Path[] = [];
     public message!: string;
@@ -61,5 +63,31 @@ export class HeaderComponent implements OnInit {
     
     newFolder(): void {
         this.onNewFolderClicked.emit();
+    }
+
+    onDragOver(event: DragEvent): void {
+        event.preventDefault(); // Required to allow dropping
+    }
+    
+
+    // 🔹 Handle item dropped onto folder
+    onDrop(event: DragEvent, path: Path): void {
+        event.preventDefault();
+        
+        const data = event.dataTransfer?.getData('application/json');
+        if (!data) return;
+
+        const droppedItem = JSON.parse(data);
+
+        console.log(`📂 Item dropped onto path: ${path.url}`, droppedItem);
+
+        const request: IListingItemMoveRequest = {
+            sourcePath: droppedItem.logicalPath,
+            destinationPath: path.url,
+            name: droppedItem.fullname,
+            isFolder: droppedItem.type === 'folder'
+        };
+
+        this.onMoveRequest.emit(request);
     }
 }

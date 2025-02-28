@@ -4,7 +4,7 @@ import { environment } from 'src/environments/environment';
 import { IListing } from 'src/models/listing';
 import { Observable } from 'rxjs';
 import { ISetThumbnailData } from 'src/models/thumbnail';
-import { IListingItemDeleteRequest } from 'src/models/listing-item';
+import { IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
 
 @Injectable({
     providedIn: 'root'
@@ -50,14 +50,17 @@ export class HttpService {
 
     fileUpload(files: File[], path: string): Observable<any> {
         const formData = new FormData();
-
+    
         files.forEach(file => {
-            formData.append('file', file);  // Make sure key is 'file' instead of 'files[]'
+            formData.append('file', file);
         });
     
         formData.append('path', path);
     
-        return this.httpClient.post<string>(this.httpServer + environment.apis.uploads, formData);
+        return this.httpClient.post<string>(this.httpServer + environment.apis.uploads, formData, {
+            observe: 'events',       // 🔥 Enables progress updates
+            reportProgress: true     // 🔥 Tells Angular to track upload progress
+        });
     }
 
     mediaDelete(path: string, request: IListingItemDeleteRequest): Observable<any> {
@@ -73,5 +76,24 @@ export class HttpService {
             'path': path,
             'name': name
         });
+    }
+
+    /**
+     * 🔥 Move a resource (folder, image, or video) to a new location.
+     * @param droppedItem The dragged resource containing details (`name`, `path`, `type`).
+     * @param destinationFolder The target folder where the resource should be moved.
+     * @returns Observable for tracking request.
+     */
+    moveResource(path: string, request: IListingItemMoveRequest): Observable<any> {
+        const requestPayload = {
+            operatingPath: path, // Original path of the resource
+            sourcePath: request.sourcePath,
+            destinationPath: request.destinationPath,
+            name: request.name,
+            isFolder: request.isFolder
+        };
+        console.log(`[${new Date().toISOString()}] 🚀 Sending move request to server:`, requestPayload);
+
+        return this.httpClient.post<string>(this.httpServer + environment.apis.moveResource, requestPayload);
     }
 }

@@ -11,12 +11,14 @@ export class Image implements IImage {
     fullname: string;
     url: string;
     thumbnail: IThumbnail;
+    logicalPath: string;
 
     constructor(image: IImage) {
         this.name = image.name;
         this.fullname = image.fullname;
         this.url = image.url;
         this.thumbnail = image.thumbnail;
+        this.logicalPath = image.logicalPath;
     }
 
     static isImage(listingItem: IListingItem): boolean {

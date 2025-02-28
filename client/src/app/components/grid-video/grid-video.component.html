@@ -1,4 +1,6 @@
- <div class="grid-item">
+<div class="grid-item" 
+    draggable="true" 
+    (dragstart)="onDragStart($event)">
     <div 
         [hidden]="videoPlaying"
         class="preview"

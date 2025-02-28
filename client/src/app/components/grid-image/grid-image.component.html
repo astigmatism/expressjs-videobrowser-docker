@@ -1,4 +1,7 @@
-<div class="grid-item">
+<div class="grid-item" 
+    draggable="true" 
+    (dragstart)="onDragStart($event)">
+
     <div
         class="preview"
         [ngStyle]="{ 
@@ -9,10 +12,11 @@
         (mouseover)="onMouseOver($event)"
         (mouseout)="onMouseOut($event)"
         (click)="onClick($event)"
+        (dragover)="$event.preventDefault()"
     >
         <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)"></div>
     </div>
     <div class="grid-item-footer">
         {{ image.name }}
     </div>
- </div>
+</div>

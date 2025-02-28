@@ -8,6 +8,7 @@
                         [listingItem]="listingItem"
                         (onFolderClick)="folderClicked($event)"
                         (onDeleteRequest)="deleteRequest($event)"
+                        (onMoveRequest)="moveRequest($event)"
                     ></app-grid-folder>
                     <app-grid-video 
                         *ngIf="isVideoListing(listingItem)" 

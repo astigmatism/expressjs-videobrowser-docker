@@ -74,7 +74,9 @@ Router.post('/upload', isAuthorized, AsyncHandler(async (req, res, next) => {
 
     const files = Array.isArray(req.files.file) ? req.files.file : [req.files.file];
 
-    await Application.FileUploaded(files, path);  // ✅ Pass all files at once
+    // ✅ Fire and forget: File uploads now trigger processing with a debounce delay
+    Application.FileUploaded(files, path)
+        .catch(error => Log.CRITICAL(`Error in FileUploaded: ${error.message}`));
 
     res.json({ message: 'Files uploaded successfully and processing started' });
 }));
@@ -97,6 +99,29 @@ Router.post('/newfolder', isAuthorized, AsyncHandler(async (req, res, next) => {
     const folderCreated = Application.CreateFolder(path, folderName);
 
     res.json(folderCreated);
+}));
+
+Router.post('/move', isAuthorized, AsyncHandler(async (req, res, next) => {
+    const { sourcePath, name, destinationPath, isFolder, operatingPath } = req.body;
+
+    // Logging request details
+    Log.INFO(`🚀 Move request received: Moving ${name} (is folder? '${isFolder}') from '${sourcePath}' to '${destinationPath}' at the location ${operatingPath}`);
+
+    try {
+        // ✅ Call application controller to handle move logic
+        const moveSuccess = await Application.MoveResource(sourcePath, destinationPath, operatingPath, name, isFolder);
+
+        if (moveSuccess) {
+            Log.FILESYSTEM(`✅ Successfully moved '${name}' to '${destinationPath}'`);
+            res.json({ message: `Successfully moved '${name}' to '${destinationPath}'` });
+        } else {
+            Log.CRITICAL(`❌ Move operation failed for '${name}'`);
+            res.status(500).json({ message: `Failed to move '${name}'. Check server logs.` });
+        }
+    } catch (error) {
+        Log.CRITICAL(`🔥 Error moving resource '${name}': ${error.message}`);
+        res.status(500).json({ message: `Error moving '${name}'`, error: error.message });
+    }
 }));
 
 Router.get(fullImageRegEx, isAuthorized, AsyncHandler(async (req, res, next) => {
@@ -178,13 +203,19 @@ Router.get('*', isAuthorized, AsyncHandler(async (req, res, next) => {
 
 
     for await (const item of contents) {
-        const filePath = Path.join(mediaRoot, path, item);
+        const logicalPath = Path.join(path, item);
+        const filePath = Path.join(mediaRoot, logicalPath);
         const fileParsed = Path.parse(filePath);
         const isDirectory = await Files.IsDirectory(filePath);
 
+
+
         if (isDirectory) {
             result.folders.push({
-                name: item
+                fullname: fileParsed.base,
+                name: item,
+                path: filePath,
+                logicalPath: logicalPath
             });
         }
         else {
@@ -200,6 +231,8 @@ Router.get('*', isAuthorized, AsyncHandler(async (req, res, next) => {
                     name: fileParsed.name,
                     fullname: fileParsed.base,
                     url: imageUrl,
+                    path: filePath,
+                    logicalPath: logicalPath,
                     thumbnail: {
                         url: thumbnailUrl,
                         width: thumbnailSize ? thumbnailSize.width : 0,
@@ -218,6 +251,8 @@ Router.get('*', isAuthorized, AsyncHandler(async (req, res, next) => {
                     fullname: fileParsed.base,
                     url: videoUrl,
                     probe: probe,
+                    path: filePath,
+                    logicalPath: logicalPath,
                     thumbnail: {
                         url: thumbnailUrl,
                         width: thumbnailSize ? thumbnailSize.width : 0,

@@ -5,12 +5,15 @@
         (onLogoutClicked)="logout()"
         (onUploadClicked)="upload()"
         (onNewFolderClicked)="newFolder()"
+        (onMoveRequest)="onMoveRequest($event)"
     ></app-header>
     <app-grid 
         [listing]="listing"
+        [movedItem]="movedItem"
         (onFolderClick)="folderClicked($event)"
         (onImageClick)="imageClicked($event)"
         (onDeleteRequest)="onDeleteRequest($event)"
+        (onMoveRequest)="onMoveRequest($event)"
     >
     </app-grid>
     <app-footer *ngIf="showFooter" [initialMessage]="initialServerState.log"></app-footer>

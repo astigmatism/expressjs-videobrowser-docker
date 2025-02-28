@@ -30,12 +30,12 @@ export class GridImageComponent implements OnInit {
 
     onMouseOver(event: MouseEvent): void {
         this.mouseOver = true;
-        this.maxHeight = 1000; // abitarily large
+        this.maxHeight = 1000; // arbitrarily large
     }
 
     onMouseOut(event: MouseEvent): void {
         this.mouseOver = false;
-        this.maxHeight = environment.grid.previewMaxHeight
+        this.maxHeight = environment.grid.previewMaxHeight;
     }
 
     onClick(event: MouseEvent): void {
@@ -47,8 +47,19 @@ export class GridImageComponent implements OnInit {
         const request: IListingItemDeleteRequest = {
             name: this.image.fullname,
             isFolder: false
-        }
+        };
         this.onDeleteRequest.emit(request);
         event.stopPropagation();
+    }
+
+    onDragStart(event: DragEvent): void {
+        if (event.dataTransfer) {
+            event.dataTransfer.setData('application/json', JSON.stringify({
+                type: 'image',
+                fullname: this.image.fullname,
+                logicalPath: this.image.logicalPath
+            }));
+        }
+        console.log(`📦 Drag started: ${this.image.name}`);
     }
 }

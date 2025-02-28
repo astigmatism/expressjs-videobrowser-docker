@@ -17,38 +17,44 @@ module.exports = new (function() {
         const convertedFileName = `${parsedFile.name}.${Config.get('video.convertedExt')}`;
         const tempConvertedFile = Path.join(mediaWorkingRoot, sourceMediaLocation, convertedFileName);
         const finalConvertedFile = Path.join(mediaOutputRoot, sourceMediaLocation, convertedFileName);
-
+    
+        Log.VIDEO(`🔍 Checking if converted file exists: "${finalConvertedFile}"`);
         const convertedFileExists = await Fse.pathExists(finalConvertedFile);
         const tempFileExists = await Fse.pathExists(tempConvertedFile);
-
+    
         if (convertedFileExists) {
-            Log.VIDEO(`The file "${parsedFile.base}" has already been converted.`);
+            Log.VIDEO(`✅ Skipping conversion. The file "${parsedFile.base}" has already been converted.`);
             return finalConvertedFile;
         }
-
+    
         if (tempFileExists) {
-            Log.VIDEO(`Removing incomplete conversion for "${parsedFile.base}" and retrying.`);
+            Log.VIDEO(`⚠️ Incomplete conversion detected for "${parsedFile.base}". Deleting and retrying.`);
             await Fse.remove(tempConvertedFile);
+            Log.VIDEO(`🗑️ Removed incomplete conversion: "${tempConvertedFile}"`);
         }
-
+    
         // Move original file to working directory with a unique name
         await Fse.ensureDir(Path.join(mediaWorkingRoot, sourceMediaLocation));
         const uniqueInputFileName = `${parsedFile.name}-working${parsedFile.ext}`;
         const tempSourceFile = Path.join(mediaWorkingRoot, sourceMediaLocation, uniqueInputFileName);
+    
+        Log.VIDEO(`🚚 Moving source file to working directory: "${sourceMediaFile}" → "${tempSourceFile}"`);
         await Fse.move(sourceMediaFile, tempSourceFile, { overwrite: true });
-
-        Log.VIDEO(`Now converting the file "${tempSourceFile}"...`);
-
+    
+        Log.VIDEO(`⚙️ Now converting the file: "${tempSourceFile}" → "${tempConvertedFile}"`);
         await HandbrakeConversion(tempSourceFile, tempConvertedFile);
-
+    
         // Move fully converted file to output folder
         await Fse.ensureDir(Path.join(mediaOutputRoot, sourceMediaLocation));
+        Log.VIDEO(`🚚 Moving converted file to output folder: "${tempConvertedFile}" → "${finalConvertedFile}"`);
         await Fse.move(tempConvertedFile, finalConvertedFile, { overwrite: true });
-
+    
         if (deleteFileWhenDone) {
+            Log.VIDEO(`🗑️ Deleting original file after conversion: "${tempSourceFile}"`);
             await Fse.remove(tempSourceFile);
         }
-
+    
+        Log.VIDEO(`🎉 Successfully converted "${parsedFile.base}" to "${finalConvertedFile}"`);
         return finalConvertedFile;
     };
 

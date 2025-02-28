@@ -1,5 +1,17 @@
+div.grid-folder:active {
+    opacity: 0.7;
+}
+
+// 🔥 Change cursor when dragging over a droppable folder
+.grid-folder.droppable {
+    cursor: copy;  // Or use "move" if it's a reorganization action
+}
+
 div.grid-folder {
     
+    /* cursor: grab; */
+    
+
     height: 160px;
     position: relative;
     background-repeat: no-repeat;

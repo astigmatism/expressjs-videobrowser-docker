@@ -211,4 +211,15 @@ export class GridVideoComponent implements OnInit {
             this.maxHeight = environment.grid.previewMaxHeight;   
         }
     }
+
+    onDragStart(event: DragEvent): void {
+        if (event.dataTransfer) {
+            event.dataTransfer.setData('application/json', JSON.stringify({
+                type: 'video',
+                fullname: this.video.fullname,
+                logicalPath: this.video.logicalPath
+            }));
+        }
+        console.log(`📦 Drag started: ${this.video.name}`);
+    }
 }

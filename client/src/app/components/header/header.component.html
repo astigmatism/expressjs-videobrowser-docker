@@ -1,6 +1,13 @@
 <div class="header">
     <ol>
-        <li *ngFor="let path of paths" (click)="pathClicked(path)">{{ path.name }}</li>
+        <li 
+            *ngFor="let path of paths" 
+            (click)="pathClicked(path)" 
+            (dragover)="onDragOver($event)" 
+            (drop)="onDrop($event, path)"
+        >
+            {{ path.name }}
+        </li>
     </ol>
     <ol class="right-options">
         <li *ngIf="showNewFolder" (click)="newFolder()">new folder</li>

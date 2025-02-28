@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HttpService } from 'src/app/services/http/http.service';
@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { IFolder } from 'src/models/folder';
 import { IImage, Image as xImage } from 'src/models/image';
 import { IListing, Listing } from 'src/models/listing';
-import { IListingItemDeleteRequest } from 'src/models/listing-item';
+import { IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
 import { ServerState } from 'src/models/server';
 
@@ -16,13 +16,14 @@ import { ServerState } from 'src/models/server';
     styleUrls: ['./browser.component.scss']
 })
 export class BrowserComponent implements OnInit, AfterViewInit {
-
+    
     @HostListener('window:keydown.escape', ['$event'])
     KeyDownEscape(event: KeyboardEvent) {
         this.logout();
     }
 
     public listing!: IListing;
+    public movedItem: IListingItemMoveRequest | null = null;
     private currentPath!: string;
     private subscriptions: Subscription[] = [];
     public imageToOpenGallery!: IImage;
@@ -117,5 +118,19 @@ export class BrowserComponent implements OnInit, AfterViewInit {
                 }
             }));
         }
+    }
+
+    onMoveRequest(request: IListingItemMoveRequest): void {
+        console.log(`📤 Sending move request for ${request.name} from ${request.sourcePath} to ${request.destinationPath}`);
+        
+        this.subscriptions.push(this.httpService.moveResource(this.listing.path, request).subscribe({
+            next: () => {
+                console.log(`✅ Move successful: ${request.name}`);
+                this.movedItem = request;  // 🔥 This will notify GridComponent
+            },
+            error: (err) => {
+                console.error(`❌ Move failed for ${request.name}:`, err);
+            }
+        }));
     }
 }

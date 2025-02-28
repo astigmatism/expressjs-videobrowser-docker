@@ -25,6 +25,10 @@ server/build/
 server/dist/
 *.tsbuildinfo
 
+server/media/output
+server/media/input/*
+server/media/thumbnails
+
 # Environment & configuration files
 # client/src/environments/
 # server/.env

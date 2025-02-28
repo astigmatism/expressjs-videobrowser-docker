@@ -1,6 +1,7 @@
 {
     "clientOrigins": [
-        "${CLIENT_ORIGINS}"
+        "${CLIENT_ORIGINS}",
+        "http://localhost:4200"
     ],
     "deleteSourceFilesAfterProcessing": true,
     "folders": {

@@ -20,7 +20,8 @@ export const environment = {
     },
     uploads: '/upload',
     deleteMedia: '/delete',
-    newFolder: '/newfolder'
+    newFolder: '/newfolder',
+    moveResource: '/move'
   },
   application: {
     showUpload: true,
