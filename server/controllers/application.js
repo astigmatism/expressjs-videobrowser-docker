@@ -225,20 +225,17 @@ module.exports = new (function() {
 
     this.CreateFolder = async (path, folderName) => {
         try {
-            // Decode path to handle URL encoding (e.g., %20 → ' ')
-            const decodedPath = decodeURIComponent(path);
-            const decodedFolderName = decodeURIComponent(folderName);
 
             // Construct full paths for input, output, and thumbnail folders
-            const inputFolder = Path.join(mediaInputRoot, decodedPath);
-            const outputFolder = Path.join(mediaOutputRoot, decodedPath);
-            const thumbnailFolder = Path.join(thumbnailsRoot, decodedPath);
+            const inputFolder = Path.join(mediaInputRoot, path);
+            const outputFolder = Path.join(mediaOutputRoot, path);
+            const thumbnailFolder = Path.join(thumbnailsRoot, path);
     
-            const newInputFolder = Path.join(inputFolder, decodedFolderName);
-            const newOutputFolder = Path.join(outputFolder, decodedFolderName);
-            const newThumbnailFolder = Path.join(thumbnailFolder, decodedFolderName);
+            const newInputFolder = Path.join(inputFolder, folderName);
+            const newOutputFolder = Path.join(outputFolder, folderName);
+            const newThumbnailFolder = Path.join(thumbnailFolder, folderName);
     
-            Log.FILESYSTEM(`📂 Request to create folder '${decodedFolderName}' in '${decodedPath}'`);
+            Log.FILESYSTEM(`📂 Request to create folder '${folderName}' in '${path}'`);
             Log.FILESYSTEM(`📁 Input folder path: ${newInputFolder}`);
             Log.FILESYSTEM(`📁 Output folder path: ${newOutputFolder}`);
             Log.FILESYSTEM(`📁 Thumbnail folder path: ${newThumbnailFolder}`);
@@ -262,7 +259,7 @@ module.exports = new (function() {
             await Fse.ensureDir(newOutputFolder);
             await Fse.ensureDir(newThumbnailFolder);
     
-            Log.FILESYSTEM(`✅ Successfully created folder '${decodedFolderName}' at '${decodedPath}'`);
+            Log.FILESYSTEM(`✅ Successfully created folder '${folderName}' at '${path}'`);
             return true;
         } catch (error) {
             Log.CRITICAL(`🔥 Error creating folder '${folderName}' in '${path}': ${error.message}`);

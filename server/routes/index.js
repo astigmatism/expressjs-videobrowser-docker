@@ -9,6 +9,7 @@ const ThumbnailMaker = require('../utility/thumbnail-maker');
 const Application = require('../controllers/application');
 const Log = require('../utility/log');
 const Passport = require('passport');
+const DirectoryCache = require('../controllers/directory.cache.js');
 
 const thumbnailRegEx = new RegExp('.*\.(' + Config.get('thumbnails.routeSuffix') + ')$');
 const fullImageRegEx = new RegExp('.*\.(' + Config.get('images.routeSuffix') + ')$');
@@ -88,15 +89,22 @@ Router.post('/delete', isAuthorized, AsyncHandler(async (req, res, next) => {
     const isFolder = req.body.isFolder;
 
     const hasFilesRemaining = await Application.MediaDelete(path, name, isFolder);
+    
+    DirectoryCache.invalidateCache(path);
+
     res.json(hasFilesRemaining); // when false, client will navigate away from current path
 }));
 
 Router.post('/newfolder', isAuthorized, AsyncHandler(async (req, res, next) => {
     
-    const path = req.body.path;
-    const folderName = req.body.name;
+    const path = decodeURIComponent(req.body.path);
+    const folderName = decodeURIComponent(req.body.name)
 
     const folderCreated = Application.CreateFolder(path, folderName);
+
+    if (folderCreated) {
+        DirectoryCache.invalidateCache(path); // ✅ Invalidate cache for the modified directory
+    }
 
     res.json(folderCreated);
 }));
@@ -113,6 +121,8 @@ Router.post('/move', isAuthorized, AsyncHandler(async (req, res, next) => {
 
         if (moveSuccess) {
             Log.FILESYSTEM(`✅ Successfully moved '${name}' to '${destinationPath}'`);
+            DirectoryCache.invalidateCache(sourcePath); // ✅ Invalidate source directory cache
+            DirectoryCache.invalidateCache(destinationPath); // ✅ Invalidate destination directory cache
             res.json({ message: `Successfully moved '${name}' to '${destinationPath}'` });
         } else {
             Log.CRITICAL(`❌ Move operation failed for '${name}'`);
@@ -181,94 +191,9 @@ Router.get(videoRegEx, isAuthorized, AsyncHandler(async (req, res, next) => {
     videoStream.pipe(res);
 }));
 
-Router.get('*', isAuthorized, AsyncHandler(async (req, res, next) => {
-    
-    const mediaRoot = Config.get('folders.outputFolder');
-    const thumbnailRoot = Config.get('thumbnails.path');
-    const thumbnailExt = Config.get('thumbnails.ext');
-    const thumbnailRouteSuffix = Config.get('thumbnails.routeSuffix');
-    const videoRouteSuffix = Config.get('video.routeSuffix');
-    const imageRouteSuffix = Config.get('images.routeSuffix');
-    const path = req.params[0] == '/' ? '' : req.params[0]; //strip out the empty /
-
-
-    const contents = await Fse.readdir(Path.join(mediaRoot, path));
-
-    let result = {
-        path: path,
-        folders: [],
-        images: [],
-        videos: []
-    };
-
-
-    for await (const item of contents) {
-        const logicalPath = Path.join(path, item);
-        const filePath = Path.join(mediaRoot, logicalPath);
-        const fileParsed = Path.parse(filePath);
-        const isDirectory = await Files.IsDirectory(filePath);
-
-
-
-        if (isDirectory) {
-            result.folders.push({
-                fullname: fileParsed.base,
-                name: item,
-                path: filePath,
-                logicalPath: logicalPath
-            });
-        }
-        else {
-
-            const thumbnailPath = Path.join(path, `${item}.${thumbnailExt}`);
-            const thumbnailUrl = Path.join(path, `${item}.${thumbnailExt}.${thumbnailRouteSuffix}`);
-            const imageUrl = Path.join(path, `${item}.${imageRouteSuffix}`);
-            const spriteSheetUrl = Path.join(path, `${item}.sheet.${thumbnailExt}.${thumbnailRouteSuffix}`);
-            const thumbnailSize = await ThumbnailMaker.GetImageSize(Path.join(thumbnailRoot, thumbnailPath));
-            
-            if (Files.IsImageFile(filePath)) {
-                result.images.push({
-                    name: fileParsed.name,
-                    fullname: fileParsed.base,
-                    url: imageUrl,
-                    path: filePath,
-                    logicalPath: logicalPath,
-                    thumbnail: {
-                        url: thumbnailUrl,
-                        width: thumbnailSize ? thumbnailSize.width : 0,
-                        height: thumbnailSize ? thumbnailSize.height : 0
-                    }
-                });
-            }
-            if (Files.IsVideoFile(filePath)) {
-
-                const videoUrl = Path.join(path, `${item}.${videoRouteSuffix}`)
-                const coordinates = await Files.GetThumbnailCoordinates(path, item);
-                const probe = await ThumbnailMaker.ProbeStream(filePath);
-
-                result.videos.push({
-                    name: item,
-                    fullname: fileParsed.base,
-                    url: videoUrl,
-                    probe: probe,
-                    path: filePath,
-                    logicalPath: logicalPath,
-                    thumbnail: {
-                        url: thumbnailUrl,
-                        width: thumbnailSize ? thumbnailSize.width : 0,
-                        height: thumbnailSize ? thumbnailSize.height : 0
-                    },
-                    spriteSheet: {
-                        width: coordinates ? coordinates[0].width : 0,
-                        height: coordinates ? coordinates[0].height : 0,
-                        url: spriteSheetUrl,
-                        coordinates: coordinates
-                    },
-                });
-            }
-        }
-    }
-
+Router.get('*', AsyncHandler(async (req, res, next) => {
+    const path = req.params[0] === '/' ? '' : req.params[0]; // Normalize path
+    const result = await DirectoryCache.getCachedDirectoryListing(path);
     res.json(result);
 }));
 
