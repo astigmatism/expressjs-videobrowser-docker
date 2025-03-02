@@ -90,6 +90,9 @@ Router.post('/delete', isAuthorized, AsyncHandler(async (req, res, next) => {
 
     const hasFilesRemaining = await Application.MediaDelete(path, name, isFolder);
     
+    if (isFolder) {
+        DirectoryCache.invalidateCache(Path.join(path, name));    
+    }
     DirectoryCache.invalidateCache(path);
 
     res.json(hasFilesRemaining); // when false, client will navigate away from current path
