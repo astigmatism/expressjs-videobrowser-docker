@@ -49,6 +49,12 @@ export class ImageGalleryComponent implements OnInit {
         this.lastMouseY = event.clientY;
     }
 
+    @HostListener('window:keydown.f', ['$event']) toggleFitFill(event: KeyboardEvent) {
+        event.preventDefault();
+        this.isFillMode = !this.isFillMode;
+        this.updateImageDisplay();
+    }
+
     public imageScale = 1;
     public minZoom = 0.5;
     public maxZoom = 3;
@@ -67,6 +73,7 @@ export class ImageGalleryComponent implements OnInit {
     private slideShowInterval!: ReturnType<typeof setInterval>;
     private countdownTimerToHideControls!: ReturnType<typeof setTimeout>;
     private countdownToHideControlsInMilliseconds = 3000;
+    public isFillMode = false;
 
     constructor() { }
 
@@ -93,6 +100,7 @@ export class ImageGalleryComponent implements OnInit {
         this.imagePositionX = 0;
         this.imagePositionY = 0;
         this.imageUrl = environment.apis.httpServer + '/' + this.images[this.currentImageIndex].url;
+        this.updateImageDisplay();
     }
 
     toggleSlideShow(): void {
@@ -115,6 +123,13 @@ export class ImageGalleryComponent implements OnInit {
         
         if (newScale >= this.minZoom && newScale <= this.maxZoom) {
             this.imageScale = newScale;
+        }
+    }
+
+    updateImageDisplay(): void {
+        const container = this.imageContainer?.nativeElement;
+        if (container) {
+            container.classList.toggle('fill-mode', this.isFillMode);
         }
     }
 }

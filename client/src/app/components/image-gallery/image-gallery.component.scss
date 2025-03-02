@@ -20,6 +20,10 @@ div.image-gallery {
         background-size: contain;
     }
 
+    .image.fill-mode {
+        background-size: cover; /* Toggle mode */
+    }
+
     div.close-button {
         position: absolute;
         top: 30px;
