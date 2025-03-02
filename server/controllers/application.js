@@ -150,6 +150,7 @@ module.exports = new (function() {
                     const outputPath = await VideoConversion.ProcessFile(itemPath, currentFolder, parsedFile);
                     if (deleteFileWhenDone) await Fse.remove(itemPath);
                     await ThumbnailMaker.ProcessVideoFile(outputPath, currentFolder);
+                    DirectoryCache.invalidateCache(Path.join('/', currentFolder)); // ✅ Invalidate source directory cache
                     continue;
                 }
 
@@ -159,14 +160,13 @@ module.exports = new (function() {
                     await Fse.copyFile(itemPath, Path.join(mediaOutputRoot, currentFolder, parsedFile.base));
                     await ThumbnailMaker.ProcessImageFile(itemPath, currentFolder);
                     if (deleteFileWhenDone) await Fse.remove(itemPath);
+                    DirectoryCache.invalidateCache(Path.join('/', currentFolder)); // ✅ Invalidate source directory cache
                     continue;
                 }
                 Log.FILESYSTEM(`Not a video or image file "${itemPath}"`);
                 if (deleteFileWhenDone) await Fse.remove(itemPath);
             }
         }
-
-        DirectoryCache.invalidateCache(currentFolder); // ✅ Invalidate source directory cache
     };
 
     const EnsureWorkingFoldersExist = async () => {
@@ -325,7 +325,7 @@ module.exports = new (function() {
         }
 
         const isDirectoryEmpty = await Fse.readdirSync(outputFolder).length === 0;
-        if (isDirectoryEmpty && path !== '') {
+        if (isDirectoryEmpty && path !== '/') {
             await Fse.remove(outputFolder);
             await Fse.remove(inputFolder);
             await Fse.remove(thumbnailFolder);

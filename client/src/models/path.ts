@@ -17,16 +17,21 @@ export class Path implements IPath {
     }
 
     static buildPathsFromListing(path: string): Path[] {
-
-        const deconstructed: string[] = path.split('/');
+        if (path === "/") {
+            return [new Path("home", "/")];
+        }
+    
+        const deconstructed = path.split('/');
         let reconstructed: string[] = [];
         let result: Path[] = [];
-
-        for (const path of deconstructed) {
-
-            reconstructed.push(path);
-            result.push(new Path(path, reconstructed.join('/')));
+    
+        for (const segment of deconstructed) {
+            if (segment !== "") {
+                reconstructed.push(segment);
+                result.push(new Path(segment, reconstructed.join('/')));
+            }
         }
-        return result;
+    
+        return [new Path("home", "/"), ...result];
     }
 }
