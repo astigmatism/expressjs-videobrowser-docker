@@ -10,6 +10,7 @@ const VideoConversion = require('../utility/video-conversion');
 const ThumbnailMaker = require('../utility/thumbnail-maker');
 const WebSocketService = require('./websockets');
 const Extract = require('extract-zip');
+const DirectoryCache = require('../controllers/directory.cache.js');
 
 module.exports = new (function() {
 
@@ -164,6 +165,8 @@ module.exports = new (function() {
                 if (deleteFileWhenDone) await Fse.remove(itemPath);
             }
         }
+
+        DirectoryCache.invalidateCache(currentFolder); // ✅ Invalidate source directory cache
     };
 
     const EnsureWorkingFoldersExist = async () => {
