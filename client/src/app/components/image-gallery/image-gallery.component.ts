@@ -22,6 +22,29 @@ export class ImageGalleryComponent implements OnInit {
     @HostListener('window:keydown.arrowleft', ['$event']) KeyDownArrowLeft(event: KeyboardEvent) { this.previousImage(); event.stopPropagation(); }
     @HostListener('window:keydown.arrowright', ['$event']) KeyDownArrowRight(event: KeyboardEvent) { this.nextImage(); event.stopPropagation(); }
     @HostListener('window:keydown.space', ['$event']) Space(event: KeyboardEvent) { this.toggleSlideShow(); event.stopPropagation(); }
+    @HostListener('window:keydown.arrowup', ['$event'])
+    KeyDownArrowUp(event: KeyboardEvent) {
+        this.showControls(); // Keep controls visible
+        this.slideShowIntervalInMilliseconds = Math.max(500, this.slideShowIntervalInMilliseconds - 500); // Lower bound
+
+        if (this.slideShowActive) {
+            this.stopSlideShow();
+            this.startSlideShow();
+        }
+        event.stopPropagation();
+    }
+
+    @HostListener('window:keydown.arrowdown', ['$event'])
+    KeyDownArrowDown(event: KeyboardEvent) {
+        this.showControls(); // Keep controls visible
+        this.slideShowIntervalInMilliseconds = Math.min(10000, this.slideShowIntervalInMilliseconds + 500); // Upper bound
+
+        if (this.slideShowActive) {
+            this.stopSlideShow();
+            this.startSlideShow();
+        }
+        event.stopPropagation();
+    }
 
     @HostListener('wheel', ['$event']) onMouseWheel(event: WheelEvent) {
         event.preventDefault();
@@ -38,6 +61,7 @@ export class ImageGalleryComponent implements OnInit {
 
     @HostListener('mousemove', ['$event']) onMouseMove(event: MouseEvent) {
         if (!this.isDragging) return;
+        this.showControls();
 
         const deltaX = event.clientX - this.lastMouseX;
         const deltaY = event.clientY - this.lastMouseY;
@@ -72,7 +96,7 @@ export class ImageGalleryComponent implements OnInit {
     private lastMouseY = 0;
     private slideShowInterval!: ReturnType<typeof setInterval>;
     private countdownTimerToHideControls!: ReturnType<typeof setTimeout>;
-    private countdownToHideControlsInMilliseconds = 3000;
+    private countdownToHideControlsInMilliseconds = 2000;
     public isFillMode = false;
 
     constructor() { }
@@ -131,5 +155,14 @@ export class ImageGalleryComponent implements OnInit {
         if (container) {
             container.classList.toggle('fill-mode', this.isFillMode);
         }
+    }
+
+    showControls(): void {
+        clearTimeout(this.countdownTimerToHideControls); // Reset the timer
+        this.hideControls = false; // Show controls immediately
+    
+        this.countdownTimerToHideControls = setTimeout(() => {
+            this.hideControls = true; // Hide controls after the timeout
+        }, this.countdownToHideControlsInMilliseconds);
     }
 }
