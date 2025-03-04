@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, HostListener } from '@angular/core';
 import { HttpService } from 'src/app/services/http/http.service';
 import { environment } from 'src/environments/environment';
 import { IListingItem, IListingItemDeleteRequest } from 'src/models/listing-item';
@@ -15,6 +15,36 @@ export class GridVideoComponent implements OnInit {
     @Input() listingItem!: IListingItem;
     @ViewChild('videoElement') videoElement!: ElementRef;
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
+    @HostListener('wheel', ['$event'])
+    onMouseWheel(event: WheelEvent) {
+        event.preventDefault(); // Prevent default browser zooming
+
+        const zoomFactor = event.deltaY > 0 ? -0.1 : 0.1;
+
+        // Remove upper limit for zoom-in
+        this.videoScale = Math.max(0.5, this.videoScale + zoomFactor); 
+
+        this.applyZoom();
+    }
+    @HostListener('document:fullscreenchange', [])
+    onFullscreenChange() {
+        if (!document.fullscreenElement) {
+            this.videoScale = 1; // Reset zoom on exit
+            this.applyZoom();
+        }
+    }
+
+    applyZoom(): void {
+        if (this.videoElement && this.videoElement.nativeElement) {
+            this.videoElement.nativeElement.style.transform = `scale(${this.videoScale})`;
+            this.videoElement.nativeElement.style.transformOrigin = "center center"; // Ensure scaling is centered
+        }
+    }
+
+    @HostListener('window:keydown.f', ['$event'])
+    onKeyDownF(event: KeyboardEvent): void {
+        this.toggleFillScreen();
+    }
 
     public video!: IVideo;
     public previewImageUrl!: string;
@@ -35,6 +65,9 @@ export class GridVideoComponent implements OnInit {
     private spriteSheetFrameRatio!: number;
     private startVideoAtTime = 0;
     private timeToFrameRatio!: number;
+    public isFullScreen = false;
+    public fillScreen = false;
+    public videoScale = 1;
 
     constructor(private httpService: HttpService) { }
 
@@ -221,5 +254,25 @@ export class GridVideoComponent implements OnInit {
             }));
         }
         console.log(`📦 Drag started: ${this.video.name}`);
+    }
+
+    toggleFullScreen(): void {
+        const videoContainer = this.videoElement.nativeElement.parentElement;
+    
+        if (!document.fullscreenElement) {
+            if (videoContainer.requestFullscreen) {
+                videoContainer.requestFullscreen();
+                this.isFullScreen = true;
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                this.isFullScreen = false;
+            }
+        }
+    }
+
+    toggleFillScreen(): void {
+        this.fillScreen = !this.fillScreen;
     }
 }
