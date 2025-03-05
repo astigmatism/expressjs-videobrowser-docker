@@ -28,6 +28,7 @@ server/dist/
 server/media/output
 server/media/input/*
 server/media/thumbnails
+server/working/*
 
 # Environment & configuration files
 # client/src/environments/

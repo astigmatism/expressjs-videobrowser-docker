@@ -11,6 +11,7 @@ const ThumbnailMaker = require('../utility/thumbnail-maker');
 const WebSocketService = require('./websockets');
 const Extract = require('extract-zip');
 const DirectoryCache = require('../controllers/directory.cache.js');
+const { moveFileChunked, writeFileChunked } = require('../utility/files');
 
 module.exports = new (function() {
 
@@ -190,7 +191,8 @@ module.exports = new (function() {
             const parsedFile = Path.parse(destinationFile);
     
             Log.FILESYSTEM(`Writing file to input folder: ${destinationFile}`);
-            await Fse.writeFile(destinationFile, file.data);
+            const writtenFile = await writeFileChunked(destinationFile, file.data);
+            console.log(`File written successfully: ${writtenFile}`);
     
             if (parsedFile.ext === '.zip') {
                 const zipExtractionFolder = Path.join(destinationFolder, parsedFile.name);
@@ -375,32 +377,32 @@ module.exports = new (function() {
             await Fse.ensureDir(destinationThumbnailFolder);
 
             if (await Fse.pathExists(sourceInputFile)) {
-                await Fse.move(sourceInputFile, destinationInputFile, { overwrite: true });
+                await moveFileChunked(sourceInputFile, destinationInputFile)
                 Log.FILESYSTEM(`📂 Moved '${sourceInputFile}' to '${destinationInputFile}'`);
             }
 
             if (await Fse.pathExists(sourceOutputFile)) {
-                await Fse.move(sourceOutputFile, destinationOutputFile, { overwrite: true });
+                await moveFileChunked(sourceOutputFile, destinationOutputFile);
                 Log.FILESYSTEM(`📂 Moved '${sourceOutputFile}' to '${destinationOutputFile}'`);
             }
 
             if (await Fse.pathExists(sourceThumbnailsFolder)) {
-                await Fse.move(sourceThumbnailsFolder, destinationThumbnailsFolder, { overwrite: true });
+                await moveFileChunked(sourceThumbnailsFolder, destinationThumbnailsFolder);
                 Log.FILESYSTEM(`📂 Moved '${sourceThumbnailsFolder}' to '${destinationThumbnailsFolder}'`);
             }
 
             if (await Fse.pathExists(sourceThumbnailFile)) {
-                await Fse.move(sourceThumbnailFile, destinationThumbnailFile, { overwrite: true });
+                await moveFileChunked(sourceThumbnailFile, destinationThumbnailFile);
                 Log.FILESYSTEM(`📂 Moved '${sourceThumbnailFile}' to '${destinationThumbnailFile}'`);
             }
 
             if (await Fse.pathExists(sourceThumbnailManifest)) {
-                await Fse.move(sourceThumbnailManifest, destinationThumbnailManifest, { overwrite: true });
+                await moveFileChunked(sourceThumbnailManifest, destinationThumbnailManifest);
                 Log.FILESYSTEM(`📂 Moved '${sourceThumbnailManifest}' to '${destinationThumbnailManifest}'`);
             }
 
             if (await Fse.pathExists(sourceThumbnailSheet)) {
-                await Fse.move(sourceThumbnailSheet, destinationThumbnailSheet, { overwrite: true });
+                await moveFileChunked(sourceThumbnailSheet, destinationThumbnailSheet);
                 Log.FILESYSTEM(`📂 Moved '${sourceThumbnailSheet}' to '${destinationThumbnailSheet}'`);
             }
 
