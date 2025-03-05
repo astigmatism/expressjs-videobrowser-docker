@@ -126,47 +126,59 @@ module.exports = new (function() {
     };
 
     const ProcessFolder = async (currentFolder) => {
-
-        const folderContents = await Fse.readdir(Path.join(mediaInputRoot, currentFolder));
-
-        for await (const item of folderContents) {
-            
-            // obtain details about this file or folder
-            const itemPath = Path.join(mediaInputRoot, currentFolder, item);
-            const isDirectory = await Files.IsDirectory(itemPath);
-
-            // if a directory, process that location
-            if (isDirectory) {
-                await ProcessFolder(Path.join(currentFolder, item));
-            }
-            else {
-
-                const parsedFile = Path.parse(itemPath);
-
-                await Fse.ensureDir(Path.join(mediaOutputRoot, currentFolder));
-                await Fse.ensureDir(Path.join(thumbnailsRoot, currentFolder));
-                
-                // is video file
-                if (Files.IsVideoFile(itemPath)) {
-                    const outputPath = await VideoConversion.ProcessFile(itemPath, currentFolder, parsedFile);
+        try {
+            const folderContents = await Fse.readdir(Path.join(mediaInputRoot, currentFolder));
+    
+            for await (const item of folderContents) {
+                try {
+                    // Obtain details about this file or folder
+                    const itemPath = Path.join(mediaInputRoot, currentFolder, item);
+                    const isDirectory = await Files.IsDirectory(itemPath);
+    
+                    if (isDirectory) {
+                        await ProcessFolder(Path.join(currentFolder, item));
+                        continue;
+                    }
+    
+                    const parsedFile = Path.parse(itemPath);
+                    await Fse.ensureDir(Path.join(mediaOutputRoot, currentFolder));
+                    await Fse.ensureDir(Path.join(thumbnailsRoot, currentFolder));
+    
+                    // Process video files
+                    if (Files.IsVideoFile(itemPath)) {
+                        try {
+                            const outputPath = await VideoConversion.ProcessFile(itemPath, currentFolder, parsedFile);
+                            if (deleteFileWhenDone) await Fse.remove(itemPath);
+                            await ThumbnailMaker.ProcessVideoFile(outputPath, currentFolder);
+                        } catch (error) {
+                            Log.CRITICAL(`🚨 Video Processing Failed: ${itemPath} - ${error.message}`);
+                        }
+                        DirectoryCache.invalidateCache(Path.join('/', currentFolder));
+                        continue;
+                    }
+    
+                    // Process image files
+                    if (Files.IsImageFile(itemPath)) {
+                        try {
+                            Log.IMAGE(`Copying image file to output folder "${itemPath}"`);
+                            await Fse.copyFile(itemPath, Path.join(mediaOutputRoot, currentFolder, parsedFile.base));
+                            await ThumbnailMaker.ProcessImageFile(itemPath, currentFolder);
+                            if (deleteFileWhenDone) await Fse.remove(itemPath);
+                        } catch (error) {
+                            Log.CRITICAL(`🚨 Image Processing Failed: ${itemPath} - ${error.message}`);
+                        }
+                        DirectoryCache.invalidateCache(Path.join('/', currentFolder));
+                        continue;
+                    }
+    
+                    Log.FILESYSTEM(`⚠️ Skipping unsupported file: "${itemPath}"`);
                     if (deleteFileWhenDone) await Fse.remove(itemPath);
-                    await ThumbnailMaker.ProcessVideoFile(outputPath, currentFolder);
-                    DirectoryCache.invalidateCache(Path.join('/', currentFolder)); // ✅ Invalidate source directory cache
-                    continue;
+                } catch (fileError) {
+                    Log.CRITICAL(`🔥 Error processing file "${item}": ${fileError.message}`);
                 }
-
-                // is image file (just copy it straight over)
-                if (Files.IsImageFile(itemPath)) {
-                    Log.IMAGE(`Copying image file to output folder "${itemPath}"`);
-                    await Fse.copyFile(itemPath, Path.join(mediaOutputRoot, currentFolder, parsedFile.base));
-                    await ThumbnailMaker.ProcessImageFile(itemPath, currentFolder);
-                    if (deleteFileWhenDone) await Fse.remove(itemPath);
-                    DirectoryCache.invalidateCache(Path.join('/', currentFolder)); // ✅ Invalidate source directory cache
-                    continue;
-                }
-                Log.FILESYSTEM(`Not a video or image file "${itemPath}"`);
-                if (deleteFileWhenDone) await Fse.remove(itemPath);
             }
+        } catch (folderError) {
+            Log.CRITICAL(`🔥 Error reading folder "${currentFolder}": ${folderError.message}`);
         }
     };
 
