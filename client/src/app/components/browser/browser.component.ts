@@ -61,7 +61,31 @@ export class BrowserComponent implements OnInit, AfterViewInit {
 
     folderClicked(folder: IFolder): void {
         const currentHref = location.href + (location.href.charAt(location.href.length - 1) === '/' ? '' : '/');
-        location.href = currentHref + encodeURIComponent(folder.name);
+        let encodedFolderName = encodeURIComponent(folder.name)
+        // Manually encode additional problematic characters
+        encodedFolderName = encodedFolderName
+            .replace(/\(/g, '%28') // Encode (
+            .replace(/\)/g, '%29') // Encode )
+            .replace(/!/g, '%21')  // Encode !
+            .replace(/~/g, '%7E')  // Encode ~
+            .replace(/\*/g, '%2A') // Encode *
+            .replace(/'/g, '%27')  // Encode '
+            .replace(/"/g, '%22')  // Encode "
+            .replace(/;/g, '%3B')  // Encode ;
+            .replace(/:/g, '%3A')  // Encode :
+            .replace(/@/g, '%40')  // Encode @
+            .replace(/&/g, '%26')  // Encode &
+            .replace(/=/g, '%3D')  // Encode =
+            .replace(/\+/g, '%2B') // Encode +
+            .replace(/\$/g, '%24') // Encode $
+            .replace(/,/g, '%2C')  // Encode ,
+            .replace(/\?/g, '%3F') // Encode ?
+            .replace(/#/g, '%23')  // Encode #
+            .replace(/\[/g, '%5B') // Encode [
+            .replace(/\]/g, '%5D') // Encode ]
+            .replace(/ /g, '%20'); // Encode spaces (encodeURIComponent already does this, but keeping it for safety)
+
+        location.href = currentHref + encodedFolderName;
     }
 
     imageClicked(image: IImage): void {
