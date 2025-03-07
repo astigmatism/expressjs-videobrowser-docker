@@ -68,24 +68,37 @@ module.exports = new (function() {
     // private methods
 
     const MediaInputFolderChangeDetected = async () => {
+        Log.INFO(`📂 Media input folder change detected at ${new Date().toISOString()}`);
+    
         if (conversionProcessInProgress) {
             conversionProcessQueued = true;
-            Log.INFO(`Processing is already active. This request is queued.`);
+            Log.WARN(`⚠️ Processing is already in progress. This request has been queued.`);
             return;
         }
     
+        Log.INFO(`🔄 Starting media processing...`);
         conversionProcessInProgress = true;
     
-        // Ensure files are fully written before processing
-        await WaitForFilesToFinishWriting(mediaInputRoot);
-        
-        await ProcessFolder('');
-        conversionProcessInProgress = false;
+        try {
+            Log.INFO(`🕵️ Ensuring all files are fully written before processing...`);
+            await WaitForFilesToFinishWriting(mediaInputRoot);
+            Log.INFO(`✅ File writing complete. Starting folder processing...`);
     
-        // If changes detected during conversion, process them now
+            await ProcessFolder('');
+    
+            Log.INFO(`✅ Processing complete.`);
+        } catch (error) {
+            Log.CRITICAL(`🔥 Error during media processing: ${error.message}`);
+        } finally {
+            conversionProcessInProgress = false;
+        }
+    
         if (conversionProcessQueued) {
+            Log.INFO(`🔁 Queued changes detected. Restarting processing...`);
             conversionProcessQueued = false;
             await MediaInputFolderChangeDetected();
+        } else {
+            Log.INFO(`🏁 No more queued changes. Media processing is idle.`);
         }
     };
 
