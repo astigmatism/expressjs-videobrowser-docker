@@ -4,6 +4,7 @@ import { IVideo, Video } from "./video";
 
 export interface IListing {
     path: string,
+    sortOption?: string;
     videos: IVideo[],
     images: IImage[],
     folders: IFolder[],
@@ -11,12 +12,14 @@ export interface IListing {
 
 export class Listing implements IListing {
     path: string = '';
+    sortOption?: string;
     videos: IVideo[] = [];
     images: IImage[] = [];
     folders: IFolder[] = [];
 
     constructor(listing: IListing) {
         this.path = listing.path;
+        this.sortOption = listing.sortOption ?? 'name-asc';
         for (const folder of listing.folders) {
             this.folders.push(new Folder(folder))
         }

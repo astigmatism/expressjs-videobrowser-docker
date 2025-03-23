@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { HttpService } from 'src/app/services/http/http.service';
 import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
@@ -13,22 +13,25 @@ import { Message, MessageType } from 'src/models/websockets';
     styleUrls: ['./header.component.scss'],
     providers: [WebsocketService]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnChanges {
 
     @Input() set path (listingPath: string) {
         this.paths = Path.buildPathsFromListing(listingPath);
     }
+    @Input() sortOption: string | undefined;
     @Input() initialMessage!: string;
     @Output() onPathClicked = new EventEmitter<Path>();
     @Output() onLogoutClicked = new EventEmitter<Path>();
     @Output() onUploadClicked = new EventEmitter<Path>();
     @Output() onNewFolderClicked = new EventEmitter<Path>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
+    @Output() onSortChanged = new EventEmitter<string>();
 
     public paths: Path[] = [];
     public message!: string;
     public showUpload = environment.application.showUpload;
     public showNewFolder = environment.application.showNewFolder;
+    public currentSortOption = 'name-asc'; // Default sort
 
     constructor(private webSocketService: WebsocketService, private httpService: HttpService) { 
         webSocketService.messages.subscribe((message: Message) => {
@@ -40,6 +43,15 @@ export class HeaderComponent implements OnInit {
 
     ngOnInit(): void {
         this.message = this.initialMessage;
+        if (this.sortOption && this.sortOption !== 'name-asc') {
+            this.currentSortOption = this.sortOption;
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['sortOption'] && changes['sortOption'].currentValue && changes['sortOption'].currentValue !== 'name-asc') {
+            this.currentSortOption = changes['sortOption'].currentValue;
+        }
     }
 
     pathClicked(path: Path): void {
@@ -89,5 +101,11 @@ export class HeaderComponent implements OnInit {
         };
 
         this.onMoveRequest.emit(request);
+    }
+
+    sortChanged(event: Event): void {
+        const selectElement = event.target as HTMLSelectElement;
+        this.currentSortOption = selectElement.value;
+        this.onSortChanged.emit(this.currentSortOption);
     }
 }

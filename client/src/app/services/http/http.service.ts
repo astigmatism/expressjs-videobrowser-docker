@@ -30,8 +30,15 @@ export class HttpService {
         return this.httpClient.post<string>(this.httpServer + environment.apis.application.state, {});
     }
 
-    getListing(path: string) {
-        return this.httpClient.get<IListing>(environment.apis.httpServer + path);
+    getListing(path: string, sort?: string) {
+        let url = `${environment.apis.httpServer}${path}`;
+    
+        if (sort) {
+            const encodedSort = encodeURIComponent(sort);
+            url += `?sort=${encodedSort}`;
+        }
+    
+        return this.httpClient.get<IListing>(url);
     }
 
     setThumbnailFromSpriteSheetFrame(data: ISetThumbnailData): Observable<string> {

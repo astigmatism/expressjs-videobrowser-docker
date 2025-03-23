@@ -36,6 +36,12 @@
 
         li {
             margin: 0 0 0 20px;
+
+            select {
+                height: 30px;
+                border-radius: 4px;
+                padding: 4px;
+            }
         }
     }
 }

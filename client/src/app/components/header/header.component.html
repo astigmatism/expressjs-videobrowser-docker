@@ -10,6 +10,20 @@
         </li>
     </ol>
     <ol class="right-options">
+        <li>
+            <select [value]="currentSortOption" (change)="sortChanged($event)">
+                <option value="name-asc">Name (A–Z)</option>
+                <option value="name-desc">Name (Z–A)</option>
+                <option value="views-desc">Views (High → Low)</option>
+                <option value="views-asc">Views (Low → High)</option>
+                <option value="createdAt-desc">Newest</option>
+                <option value="createdAt-asc">Oldest</option>
+                <option value="lastViewed-desc">Last Viewed (Recent → Old)</option>
+                <option value="lastViewed-asc">Last Viewed (Old → Recent)</option>
+                <option value="favorite-desc">Favorites</option>
+                <option value="special-desc">Special</option>
+            </select>
+        </li>
         <li *ngIf="showNewFolder" (click)="newFolder()">new folder</li>
         <li *ngIf="showUpload" (click)="upload()">upload</li>
         <li (click)="logout()">logout</li>

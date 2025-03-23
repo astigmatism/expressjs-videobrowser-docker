@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, HostListener, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, HostListener, OnInit, Output, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HttpService } from 'src/app/services/http/http.service';
@@ -32,11 +32,12 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     public newFolderDialogActive = false;
     public initialServerState!: ServerState;
     public showFooter = false;
+    public currentSort: string | undefined = undefined
 
-    constructor(private httpService: HttpService, private router: Router) { };
+    constructor(private httpService: HttpService, private router: Router, private cdr: ChangeDetectorRef) { };
 
     ngOnInit(): void {
-        this.currentPath = this.router.url;
+        this.currentPath = window.location.pathname;
         this.showFooter = environment.application.showFooter;
     }
 
@@ -54,8 +55,15 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     }
 
     private fetchListing(path: string): void {
-        this.subscriptions.push(this.httpService.getListing(path).subscribe((listing: IListing) => {
-            this.listing = new Listing(listing);
+        this.subscriptions.push(this.httpService.getListing(path, this.currentSort).subscribe((listing: IListing) => {
+            setTimeout(() => {
+                this.listing = new Listing(listing);
+
+                // ✅ Use the sortOption from the listing itself
+                this.currentSort = this.listing.sortOption ?? 'name-asc';
+                console.log(this.currentSort)
+                this.cdr.detectChanges(); // Force Angular to re-check the view
+            });
         }));
     }
 
@@ -156,5 +164,10 @@ export class BrowserComponent implements OnInit, AfterViewInit {
                 console.error(`❌ Move failed for ${request.name}:`, err);
             }
         }));
+    }
+
+    handleSortChanged(newSort: string): void {
+        this.currentSort = newSort;
+        this.fetchListing(this.currentPath);
     }
 }

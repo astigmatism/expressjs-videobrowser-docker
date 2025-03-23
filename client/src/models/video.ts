@@ -1,4 +1,5 @@
 import { IListingItem } from "./listing-item";
+import { IMetadata, IProbe } from "./metadata";
 import { ISpriteSheet } from "./spritesheet";
 import { IThumbnail } from "./thumbnail";
 
@@ -14,6 +15,9 @@ export interface IVideo extends IListingItem {
     thumbnail: IThumbnail;
     spriteSheet: ISpriteSheet;
     url: string;
+    metadata?: IMetadata;
+
+    // derived
     probe: IProbe;
     resolutionClass: VideoResolutionClass
 }
@@ -25,18 +29,28 @@ export class Video implements IVideo {
     thumbnail: IThumbnail;
     spriteSheet: ISpriteSheet;
     url: string;
+    metadata?: IMetadata;
+    
     resolutionClass: VideoResolutionClass;
     logicalPath: string;
 
     constructor(video: IVideo) {
         this.name = video.name;
         this.fullname = video.fullname;
-        this.probe = video.probe;
-        this.url = video.url;
         this.thumbnail = video.thumbnail;
         this.spriteSheet = video.spriteSheet;
-        this.resolutionClass = Video.getResolutionClass(this.probe.height);
+        this.url = video.url;
         this.logicalPath = video.logicalPath;
+        this.metadata = video.metadata;
+
+        this.probe = video.metadata?.probe ?? {
+            width: 0,
+            height: 0,
+            duration: 0,
+            display_aspect_ratio: ''
+        };
+
+        this.resolutionClass = Video.getResolutionClass(this.probe.height);
     }
 
     static isVideo(listingItem: IListingItem): boolean {
@@ -56,11 +70,4 @@ export class Video implements IVideo {
         if (value >= 480) return VideoResolutionClass.r480;
         return VideoResolutionClass.r240;
     }
-}
-
-interface IProbe {
-    width: number,
-    height: number,
-    display_aspect_ratio: string,
-    duration: number
 }

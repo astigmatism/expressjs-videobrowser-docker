@@ -1,11 +1,13 @@
 <div *ngIf="listing; else loading">
     <app-header 
         [path]="listing.path"
+        [sortOption]="currentSort"
         (onPathClicked)="pathClicked($event)"
         (onLogoutClicked)="logout()"
         (onUploadClicked)="upload()"
         (onNewFolderClicked)="newFolder()"
         (onMoveRequest)="onMoveRequest($event)"
+        (onSortChanged)="handleSortChanged($event)"
     ></app-header>
     <app-grid 
         [listing]="listing"

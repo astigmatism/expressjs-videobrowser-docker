@@ -12,6 +12,7 @@ const WebSocketService = require('./websockets');
 const Extract = require('extract-zip');
 const DirectoryCache = require('../controllers/directory.cache.js');
 const { moveFileChunked, writeFileChunked } = require('../utility/files');
+const MetadataManager = require('./metadata.js')
 
 module.exports = new (function() {
 
@@ -359,6 +360,15 @@ module.exports = new (function() {
             Log.FILESYSTEM(`Directory "${outputFolder}" is now empty, removing it.`);
             return false;
         }
+
+        const metadata = await MetadataManager.loadMetadata(outputFolder);
+        if (metadata[name]) {
+            delete metadata[name];
+            MetadataManager.cache.set(outputFolder, metadata);
+            await MetadataManager.saveMetadata(outputFolder);
+            Log.FILESYSTEM(`Metadata entry for "${name}" removed from ${Path.join(outputFolder, '.metadata.json')}`);
+        }
+
         return true;
     };
 
@@ -429,6 +439,25 @@ module.exports = new (function() {
             if (await Fse.pathExists(sourceThumbnailSheet)) {
                 await moveFileChunked(sourceThumbnailSheet, destinationThumbnailSheet);
                 Log.FILESYSTEM(`📂 Moved '${sourceThumbnailSheet}' to '${destinationThumbnailSheet}'`);
+            }
+
+            // Load both source and destination metadata files
+            const sourceMetadata = await MetadataManager.loadMetadata(sourceOutputFolder);
+            const destinationMetadata = await MetadataManager.loadMetadata(destinationOutputFolder);
+
+            // If source metadata contains an entry for this item, move it
+            if (sourceMetadata[name]) {
+                destinationMetadata[name] = sourceMetadata[name];
+                delete sourceMetadata[name];
+
+                // Persist changes
+                MetadataManager.cache.set(operatingPath, sourceMetadata);
+                MetadataManager.cache.set(destinationPath, destinationMetadata);
+
+                await MetadataManager.saveMetadata(sourceOutputFolder);
+                await MetadataManager.saveMetadata(destinationOutputFolder);
+
+                Log.FILESYSTEM(`🔄 Moved metadata for '${name}' from '${operatingPath}' to '${destinationPath}'`);
             }
 
             return true;

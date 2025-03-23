@@ -58,12 +58,22 @@ Router.post('/processMedia', isAuthorized, AsyncHandler(async (req, res, next) =
 }));
 
 Router.post('/setThumbnail', isAuthorized, AsyncHandler(async (req, res, next) => {
-    
-    const spriteSheetPath = removeRouteSuffix(req.body.spriteSheetUrl, 'thumbnails');
-    const thumbnailPath = removeRouteSuffix(req.body.thumbnailUrl, 'thumbnails');
-    const thumbnailFile = await ThumbnailMaker.CropSpriteSheetToThumbnail(spriteSheetPath, thumbnailPath, req.body.coordinates);
-    const content = await Fse.readFile(thumbnailFile);
-    res.json(content.toString('base64'));
+    try {
+        const spriteSheetPath = removeRouteSuffix(req.body.spriteSheetUrl, 'thumbnails');
+        const thumbnailPath = removeRouteSuffix(req.body.thumbnailUrl, 'thumbnails');
+
+        const thumbnailFile = await ThumbnailMaker.CropSpriteSheetToThumbnail(
+            spriteSheetPath,
+            thumbnailPath,
+            req.body.coordinates
+        );
+
+        const content = await Fse.readFile(thumbnailFile);
+        res.json(content.toString('base64'));
+    } catch (err) {
+        Log.CRITICAL(`❌ set thumbnail failed '${err}'`);
+        next(err); // Pass to error middleware
+    }
 }));
 
 Router.post('/upload', isAuthorized, AsyncHandler(async (req, res, next) => {
@@ -124,7 +134,7 @@ Router.post('/move', isAuthorized, AsyncHandler(async (req, res, next) => {
 
         if (moveSuccess) {
             Log.FILESYSTEM(`✅ Successfully moved '${name}' to '${destinationPath}'`);
-            DirectoryCache.invalidateCache(sourcePath); // ✅ Invalidate source directory cache
+            DirectoryCache.invalidateCache(operatingPath); // ✅ Invalidate source directory cache
             DirectoryCache.invalidateCache(destinationPath); // ✅ Invalidate destination directory cache
             res.json({ message: `Successfully moved '${name}' to '${destinationPath}'` });
         } else {
@@ -196,7 +206,8 @@ Router.get(videoRegEx, isAuthorized, AsyncHandler(async (req, res, next) => {
 
 Router.get('*', AsyncHandler(async (req, res, next) => {
     const path = req.params[0] === '/' ? '' : req.params[0]; // Normalize path
-    const result = await DirectoryCache.getCachedDirectoryListing(path);
+    const sortOption = req.query.sort || null;
+    const result = await DirectoryCache.getCachedDirectoryListing(path, sortOption);
     res.json(result);
 }));
 

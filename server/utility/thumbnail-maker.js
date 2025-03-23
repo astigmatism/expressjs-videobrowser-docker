@@ -83,6 +83,25 @@ module.exports = new (function () {
         });
     };
 
+
+    this.CropSpriteSheetToThumbnail = async (spriteSheetFileUrl, thumbnailUrl, coordinates) => {
+        const thumbnailRoot = Config.get('thumbnails.path');
+        const spriteSheetFile = Path.join(thumbnailRoot, spriteSheetFileUrl);
+        const thumbnailFile = Path.join(thumbnailRoot, thumbnailUrl);
+    
+        return new Promise((resolve, reject) => {
+            gm(spriteSheetFile)
+                .crop(coordinates.width, coordinates.height, coordinates.x, coordinates.y)
+                .write(thumbnailFile, (err) => {
+                    if (err) {
+                        Log.THUMB(`Failed to crop thumbnail from sprite sheet: ${err.message}`);
+                        return reject(new Error(`Failed to crop thumbnail: ${err.message}`));
+                    }
+                    resolve(thumbnailFile);
+                });
+        });
+    };
+
     const ExtractFrameForThumbnail = async (sourceMediaFile, fileInfo, thumbnailOutputFile) => {
         const captureInMs = Math.floor(fileInfo.duration * 1000 * 0.5);
 
