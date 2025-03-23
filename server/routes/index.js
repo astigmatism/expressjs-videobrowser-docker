@@ -11,9 +11,9 @@ const Log = require('../utility/log');
 const Passport = require('passport');
 const DirectoryCache = require('../controllers/directory.cache.js');
 
-const thumbnailRegEx = new RegExp('.*\.(' + Config.get('thumbnails.routeSuffix') + ')$');
-const fullImageRegEx = new RegExp('.*\.(' + Config.get('images.routeSuffix') + ')$');
-const videoRegEx = new RegExp('.*\.(' + Config.get('video.routeSuffix') + ')$');
+const thumbnailRegEx = new RegExp(`\\.${Config.get('thumbnails.ext')}\\.${Config.get('thumbnails.routeSuffix')}$`);
+const fullImageRegEx = new RegExp(`\\.${Config.get('images.routeSuffix')}$`);
+const videoRegEx = new RegExp(`\\.${Config.get('video.routeSuffix')}$`);
 
 const isAuthorized = (request, response, next) => {
     if (request.isAuthenticated()) { 
@@ -205,6 +205,7 @@ Router.get(videoRegEx, isAuthorized, AsyncHandler(async (req, res, next) => {
 }));
 
 Router.get('*', AsyncHandler(async (req, res, next) => {
+    console.log('hello!')
     const path = req.params[0] === '/' ? '' : req.params[0]; // Normalize path
     const sortOption = req.query.sort || null;
     const result = await DirectoryCache.getCachedDirectoryListing(path, sortOption);

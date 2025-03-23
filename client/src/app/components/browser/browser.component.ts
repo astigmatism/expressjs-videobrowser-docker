@@ -55,16 +55,25 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     }
 
     private fetchListing(path: string): void {
-        this.subscriptions.push(this.httpService.getListing(path, this.currentSort).subscribe((listing: IListing) => {
-            setTimeout(() => {
-                this.listing = new Listing(listing);
-
-                // ✅ Use the sortOption from the listing itself
-                this.currentSort = this.listing.sortOption ?? 'name-asc';
-                console.log(this.currentSort)
-                this.cdr.detectChanges(); // Force Angular to re-check the view
-            });
-        }));
+        this.subscriptions.push(
+            this.httpService.getListing(path, this.currentSort).subscribe(
+                (listing: IListing) => {
+                    setTimeout(() => {
+                        this.listing = new Listing(listing);
+    
+                        // ✅ Pull sort from the server response if present
+                        this.currentSort = this.listing.sortOption ?? 'name-asc';
+                        console.log('Current Sort:', this.currentSort);
+    
+                        this.cdr.detectChanges();
+                    });
+                },
+                (error) => {
+                    console.error(`❌ Failed to fetch listing for path "${path}"`, error);
+                    // You can also display a UI message or toast here
+                }
+            )
+        );
     }
 
     folderClicked(folder: IFolder): void {
