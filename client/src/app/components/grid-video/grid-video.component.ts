@@ -36,16 +36,34 @@ export class GridVideoComponent implements OnInit {
         }
     }
 
-    applyZoom(): void {
-        if (this.videoElement && this.videoElement.nativeElement) {
-            this.videoElement.nativeElement.style.transform = `scale(${this.videoScale})`;
-            this.videoElement.nativeElement.style.transformOrigin = "center center"; // Ensure scaling is centered
-        }
-    }
-
     @HostListener('window:keydown.f', ['$event'])
     onKeyDownF(event: KeyboardEvent): void {
         this.toggleFillScreen();
+    }
+    @HostListener('window:keydown.d', ['$event'])
+    onKeyDownD(event: KeyboardEvent): void {
+        if (this.fillScreen) {
+            this.panPercent = Math.max(0, this.panPercent - 5);
+        }
+    }
+    @HostListener('window:keydown.g', ['$event'])
+    onKeyDownG(event: KeyboardEvent): void {
+        if (this.fillScreen) {
+            this.panPercent = Math.min(100, this.panPercent + 5)
+        }
+    }
+
+    @HostListener('window:keydown.r', ['$event'])
+    onKeyDownR(event: KeyboardEvent): void {
+        if (this.fillScreen) {
+            this.panVerticalPercent = Math.max(0, this.panVerticalPercent - 5);
+        }
+    }
+    @HostListener('window:keydown.c', ['$event'])
+    onKeyDownC(event: KeyboardEvent): void {
+        if (this.fillScreen) {
+            this.panVerticalPercent = Math.min(100, this.panVerticalPercent + 5);
+        }
     }
 
     public video!: IVideo;
@@ -71,6 +89,8 @@ export class GridVideoComponent implements OnInit {
     public fillScreen = false;
     public videoScale = 1;
     public showMetadata = false;
+    public panPercent = 50;           // horizontal panning (left-right)
+    public panVerticalPercent = 50;   // vertical panning (top-bottom)
 
     constructor(private httpService: HttpService, private websocketService: WebsocketService) { }
 
@@ -312,6 +332,13 @@ export class GridVideoComponent implements OnInit {
 
     toggleFillScreen(): void {
         this.fillScreen = !this.fillScreen;
+    }
+
+    applyZoom(): void {
+        if (this.videoElement && this.videoElement.nativeElement) {
+            this.videoElement.nativeElement.style.transform = `scale(${this.videoScale})`;
+            this.videoElement.nativeElement.style.transformOrigin = "center center";
+        }
     }
 
     getCreatedAgo(): string {

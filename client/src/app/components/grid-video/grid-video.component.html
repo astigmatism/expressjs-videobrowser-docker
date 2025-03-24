@@ -36,7 +36,10 @@
             type="video/mp4"
             (keydown)="onKeyDown($event)"
             controls
-            [ngStyle]="{'object-fit': fillScreen ? 'cover' : 'contain'}"
+            [ngStyle]="{
+                'object-fit': fillScreen ? 'cover' : 'contain',
+                'object-position': fillScreen ? panPercent + '% ' + panVerticalPercent + '%' : 'center center'
+            }"
         >
         </video>
         <app-video-caption [message]="videoCaption"></app-video-caption>
