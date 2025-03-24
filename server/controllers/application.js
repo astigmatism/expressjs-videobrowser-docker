@@ -73,7 +73,7 @@ module.exports = new (function() {
     
         if (conversionProcessInProgress) {
             conversionProcessQueued = true;
-            Log.WARN(`⚠️ Processing is already in progress. This request has been queued.`);
+            Log.INFO(`⚠️ Processing is already in progress. This request has been queued.`);
             return;
         }
     

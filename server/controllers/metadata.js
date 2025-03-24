@@ -22,16 +22,27 @@ class MetadataManager {
         return metadata;
     }
 
-    _createDefaultMetadataItem() {
-        const now = new Date().toISOString();
-        return {
-            createdAt: now,
-            lastViewed: null,
-            views: 0,
-            favorite: 0,
-            special: 0,
-            tags: []
-        };
+    async _createDefaultMetadataItem(filePath) {
+        try {
+            const stats = await Fse.stat(filePath);
+            return {
+                createdAt: stats.birthtime.toISOString(),  // actual creation date
+                lastViewed: null,
+                views: 0,
+                spice: 0,
+                tags: []
+            };
+        } catch (err) {
+            Log.CRITICAL(`❌ Failed to stat file for metadata: ${filePath}`, err);
+            // Fallback to current timestamp if stat fails
+            return {
+                createdAt: new Date().toISOString(),
+                lastViewed: null,
+                views: 0,
+                spice: 0,
+                tags: []
+            };
+        }
     }
 
     async initializeMetadataForDirectory(folderPath, itemNames, currentSortOption = 'name-asc') {
@@ -66,7 +77,8 @@ class MetadataManager {
         // Add new items
         for (const item of itemSet) {
             if (!metadata[item]) {
-                metadata[item] = this._createDefaultMetadataItem();
+                const itemPath = Path.join(folderPath, item);
+                metadata[item] = await this._createDefaultMetadataItem(itemPath);
                 updated = true;
             }
         }
@@ -90,16 +102,14 @@ class MetadataManager {
     async updateItemMetadata(folderPath, itemName, updates = {}) {
         const metadata = await this.loadMetadata(folderPath);
         const existing = metadata[itemName] || {
-            createdAt: new Date().toISOString(),
-            lastAccessedAt: null,
+            createdAt: new Date().toISOString()
         };
-
+    
         const updated = {
             ...existing,
-            lastAccessedAt: new Date().toISOString(),
             ...updates
         };
-
+    
         metadata[itemName] = updated;
         this.cache.set(folderPath, metadata);
         await this.saveMetadata(folderPath);
@@ -109,12 +119,10 @@ class MetadataManager {
         const metadata = await this.loadMetadata(folderPath);
         const entry = metadata[itemName] || {
             createdAt: new Date().toISOString(),
-            lastAccessedAt: null,
         };
-
+    
         entry[field] = (entry[field] || 0) + 1;
-        entry.lastAccessedAt = new Date().toISOString();
-
+    
         metadata[itemName] = entry;
         this.cache.set(folderPath, metadata);
         await this.saveMetadata(folderPath);
@@ -189,6 +197,29 @@ class MetadataManager {
     
         await walk(mediaRoot);
         return matchingItems;
+    }
+
+    async deleteAllMetadataFiles(rootPath) {
+        const deleted = [];
+    
+        const walk = async (folder) => {
+            const entries = await Fse.readdir(folder);
+            for (const entry of entries) {
+                const entryPath = Path.join(folder, entry);
+                const stat = await Fse.stat(entryPath);
+                if (stat.isDirectory()) {
+                    await walk(entryPath);
+                } else if (entry === METADATA_FILENAME) {
+                    await Fse.remove(entryPath);
+                    deleted.push(entryPath);
+                    Log.INFO(`🗑️ Deleted metadata file: ${entryPath}`);
+                }
+            }
+        };
+    
+        await walk(rootPath);
+        this.cache.clear();
+        return deleted;
     }
 }
 

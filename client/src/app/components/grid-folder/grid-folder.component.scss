@@ -28,14 +28,37 @@ div.grid-folder {
         color: #777;
     }
 
-    .delete::after {
+    .delete {
         position: absolute;
-        top: 30px;
+        top: 35px;
         right: 5px;
         width: 20px;
         height: 20px;
-        font-size: 20px;
-        color: red;
-        content: '\00d7'; /* This will render the 'X' */
+        font-size: 10px;
+    }
+
+    .metadata-icon {
+        position: absolute;
+        bottom: 10px;
+        right: 5px;
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+
+        .metadata-popup {
+            position: absolute;
+            bottom: 120%;
+            left: 0;
+            background: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none; // Allows drag/drop to work under the hood
+        }
     }
 }

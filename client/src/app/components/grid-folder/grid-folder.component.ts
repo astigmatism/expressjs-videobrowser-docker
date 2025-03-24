@@ -3,6 +3,7 @@ import { IFolder } from 'src/models/folder';
 import { IListingItem, IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
 import { environment } from 'src/environments/environment';
 import { HttpService } from 'src/app/services/http/http.service';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-grid-folder',
@@ -19,6 +20,7 @@ export class GridFolderComponent implements OnInit {
     public folder!: IFolder;
     public mouseOver = false;
     public canDelete = environment.application.canDelete;
+    public showMetadata = false;
 
     constructor(private httpService: HttpService) { }
 
@@ -91,5 +93,13 @@ export class GridFolderComponent implements OnInit {
         };
 
         this.onMoveRequest.emit(request);
+    }
+
+    getCreatedAgo(): string {
+        return moment(this.folder.metadata?.createdAt).fromNow(); // e.g., "12 days ago"
+    }
+    
+    getLastOpenedAgo(): string {
+        return moment(this.folder.metadata?.lastViewed).fromNow();
     }
 }

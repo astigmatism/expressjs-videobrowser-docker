@@ -10,8 +10,7 @@ import { Message, MessageType } from 'src/models/websockets';
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    providers: [WebsocketService]
+    styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnChanges {
 
@@ -32,9 +31,11 @@ export class HeaderComponent implements OnInit, OnChanges {
     public showUpload = environment.application.showUpload;
     public showNewFolder = environment.application.showNewFolder;
     public currentSortOption = 'name-asc'; // Default sort
+    public showSettings = false;
+    public showLogDialog = false;
 
-    constructor(private webSocketService: WebsocketService, private httpService: HttpService) { 
-        webSocketService.messages.subscribe((message: Message) => {
+    constructor(private webSocketService: WebsocketService, private httpService: HttpService) {
+        webSocketService.messages$.subscribe((message: Message) => {
             if (message.command === MessageType.LOG) {
                 this.message = message.content;
             }
@@ -65,8 +66,9 @@ export class HeaderComponent implements OnInit, OnChanges {
         });
     }
 
-    logout(): void {
+    logout(event: MouseEvent): void {
         this.onLogoutClicked.emit();
+        event.stopPropagation();
     }
 
     upload(): void {
@@ -75,6 +77,34 @@ export class HeaderComponent implements OnInit, OnChanges {
     
     newFolder(): void {
         this.onNewFolderClicked.emit();
+    }
+
+    toggleLogDialog(event: MouseEvent): void {
+        this.showLogDialog = !this.showLogDialog;
+        this.showSettings = false; // 🔹 Collapse the settings menu
+        event.stopPropagation();   // Optional: prevents bubbling in some cases
+    }
+
+    toggleSettingsDropdown(): void {
+        this.showSettings = !this.showSettings;
+    }
+
+    clearMetadata(event: MouseEvent): void {
+        const confirmed = window.confirm('Are you sure? This clears ALL server metadata including view counts, et al. This action cannot be undone.');
+
+        if (!confirmed) return;
+
+        this.httpService.clearMetadataAndCache().subscribe({
+            next: (response) => {
+                console.log(response.message);
+                // Optionally show a toast or confirmation message here
+            },
+            error: (err) => {
+                console.error('❌ Failed to clear metadata and cache', err);
+                // Show a user-friendly error message if needed
+            }
+        });
+        event.stopPropagation();
     }
 
     onDragOver(event: DragEvent): void {

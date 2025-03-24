@@ -38,15 +38,14 @@ div.grid-item {
             background-color: darkmagenta;
         }
 
-        .delete::after {
+        .delete {
             position: absolute;
-            top: 0px;
-            right: 0px;
+            top: 5px;
+            right: 5px;
             width: 20px;
             height: 20px;
-            font-size: 20px;
+            font-size: 10px;
             color: red;
-            content: '\00d7'; /* This will render the 'X' */
         }
     }
 
@@ -57,6 +56,11 @@ div.grid-item {
 
     .grid-item-footer {
 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 4px 8px;
+        height: 30px; // increased height to accommodate 2 rows
         cursor: pointer;
 
         /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#866ef2+0,7354ee+50,6136f0+51,5e1ede+100 */
@@ -66,8 +70,71 @@ div.grid-item {
         background: linear-gradient(to bottom,  rgba(134,110,242,1) 0%,rgba(115,84,238,1) 50%,rgba(97,54,240,1) 51%,rgba(94,30,222,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#866ef2', endColorstr='#5e1ede',GradientType=0 ); /* IE6-9 */
 
-        .name {
-            width: 75%;
+        .icon-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        
+            .left-icons,
+            .right-icons {
+            display: flex;
+            gap: 10px;
+            }
+        
+            .left-icons > div,
+            .right-icons > div {
+            cursor: pointer;
+            font-size: 10px;
+            user-select: none;
+              position: relative; // For popups if needed
+            }
+        
+            .show-on-footer-hover {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            }
+        
+            .info-icon-wrapper {
+                position: relative;
+            
+                .metadata-popup {
+                    position: absolute;
+                    bottom: 120%;
+                    left: 0;
+                    background: #fff;
+                    color: #333;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 8px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+            }
+        }
+
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        
+            .name {
+                width: 75%;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
         }
     }
+}
+
+div.grid-item:hover .grid-item-footer .icon-row .show-on-footer-hover {
+    opacity: 1;
+}
+
+.emoji-grayscale {
+    filter: grayscale(50%);
+    opacity: 0.6;
 }

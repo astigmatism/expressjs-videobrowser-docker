@@ -4,6 +4,8 @@ import { environment } from 'src/environments/environment';
 import { IListingItem, IListingItemDeleteRequest } from 'src/models/listing-item';
 import { ISetThumbnailData } from 'src/models/thumbnail';
 import { IVideo, Video } from 'src/models/video';
+import * as moment from 'moment';
+import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 
 @Component({
     selector: 'app-grid-video',
@@ -68,8 +70,9 @@ export class GridVideoComponent implements OnInit {
     public isFullScreen = false;
     public fillScreen = false;
     public videoScale = 1;
+    public showMetadata = false;
 
-    constructor(private httpService: HttpService) { }
+    constructor(private httpService: HttpService, private websocketService: WebsocketService) { }
 
     ngOnInit(): void {
 
@@ -147,11 +150,46 @@ export class GridVideoComponent implements OnInit {
             }
         }
         el.focus();
+
+        this.websocketService.sendMetadataUpdate([{
+            action: 'increment',
+            target: 'views',
+            type: 'video',
+            fullname: this.video.fullname,
+            homePath: this.video.homePath
+        },{
+            action: 'set',
+            target: 'lastViewed',
+            value: new Date().toISOString(),
+            type: 'video',
+            fullname: this.video.fullname,
+            homePath: this.video.homePath
+        }]);
+        if (this.video.metadata) {
+            this.video.metadata.views = (this.video.metadata.views ?? 0) + 1;
+        }
+        if (this.video.metadata) {
+            this.video.metadata.lastViewed = new Date().toISOString();
+        }
     }
 
     onBadgeClick(event: MouseEvent): void {
         this.scrubbingEnabledForThumbnail = true;
         this.toggleScrubbing(true);
+        event.stopPropagation();
+    }
+
+    onSpiceClick(event: MouseEvent): void {
+        this.websocketService.sendMetadataUpdate([{
+            action: 'increment',
+            target: 'spice',
+            type: 'video',
+            fullname: this.video.fullname,
+            homePath: this.video.homePath
+        }]);
+        if (this.video.metadata) {
+            this.video.metadata.spice = (this.video.metadata.spice ?? 0) + 1;
+        }
         event.stopPropagation();
     }
 
@@ -274,5 +312,13 @@ export class GridVideoComponent implements OnInit {
 
     toggleFillScreen(): void {
         this.fillScreen = !this.fillScreen;
+    }
+
+    getCreatedAgo(): string {
+        return moment(this.video.metadata?.createdAt).fromNow(); // e.g., "12 days ago"
+    }
+    
+    getLastOpenedAgo(): string {
+        return moment(this.video.metadata?.lastViewed).fromNow();
     }
 }

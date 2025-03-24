@@ -11,5 +11,18 @@
     (drop)="onDrop($event)">
 
     <div class="title">{{ folder.name }}</div>
-    <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)"></div>
+    <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)">❌</div>
+    <div
+        [hidden]="!mouseOver"
+        class="metadata-icon"
+        (mouseover)="showMetadata = true"
+        (mouseout)="showMetadata = false"
+    >
+        ℹ️
+        <div class="metadata-popup" *ngIf="showMetadata" (click)="$event.stopPropagation()">
+            <div><strong>Views:</strong> {{ folder.metadata?.views }}</div>
+            <div><strong>Created:</strong> {{ getCreatedAgo() }}</div>
+            <div><strong>Last Opened:</strong> {{ getLastOpenedAgo() }}</div>
+        </div>
+    </div>
 </div>

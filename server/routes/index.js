@@ -10,6 +10,7 @@ const Application = require('../controllers/application');
 const Log = require('../utility/log');
 const Passport = require('passport');
 const DirectoryCache = require('../controllers/directory.cache.js');
+const MetadataManager = require('../controllers/metadata.js');
 
 const thumbnailRegEx = new RegExp(`\\.${Config.get('thumbnails.ext')}\\.${Config.get('thumbnails.routeSuffix')}$`);
 const fullImageRegEx = new RegExp(`\\.${Config.get('images.routeSuffix')}$`);
@@ -22,11 +23,6 @@ const isAuthorized = (request, response, next) => {
     // when not authenticated, return 401 and let client handle it
     response.status(401).json({ message: 'Unauthorized Message' });
 }
-
-Router.get('/test', (req, res) => {
-    console.log('Received request at /test');
-    return res.json({ message: "Test route is working!", timestamp: new Date().toISOString() });
-});
 
 Router.post('/login', Passport.authenticate('local'), (request, response, next) => {
     if (request.isAuthenticated()) {
@@ -204,8 +200,20 @@ Router.get(videoRegEx, isAuthorized, AsyncHandler(async (req, res, next) => {
     videoStream.pipe(res);
 }));
 
+Router.post('/clear-metadata', isAuthorized, AsyncHandler(async (req, res, next) => {
+    const mediaRoot = Config.get('folders.outputFolder');
+
+    const deletedMetadataFiles = await MetadataManager.deleteAllMetadataFiles(mediaRoot);
+    DirectoryCache.clearAll();
+
+    res.json({
+        message: '✅ Metadata and cache cleared.',
+        deletedMetadataFiles,
+        total: deletedMetadataFiles.length
+    });
+}));
+
 Router.get('*', AsyncHandler(async (req, res, next) => {
-    console.log('hello!')
     const path = req.params[0] === '/' ? '' : req.params[0]; // Normalize path
     const sortOption = req.query.sort || null;
     const result = await DirectoryCache.getCachedDirectoryListing(path, sortOption);

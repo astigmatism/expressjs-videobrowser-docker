@@ -16,6 +16,8 @@ import { HttpErrorInterceptor } from './util/http-error-interceptor';
 import { LoginComponent } from './components/login/login.component';
 import { UploadComponent } from './components/upload/upload.component';
 import { NewFolderComponent } from './components/new-folder/new-folder.component';
+import { WebsocketService } from './services/web-sockets/web-sockets.service';
+import { ServerLogDialogComponent } from './components/server-log-dialog/server-log-dialog.component';
 
 @NgModule({
   declarations: [
@@ -31,15 +33,17 @@ import { NewFolderComponent } from './components/new-folder/new-folder.component
     FooterComponent,
     LoginComponent,
     UploadComponent,
-    NewFolderComponent
+    NewFolderComponent,
+    ServerLogDialogComponent
   ],
   imports: [
     AppRoutingModule,
     BrowserModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+    WebsocketService
   ],
   bootstrap: [AppComponent]
 })

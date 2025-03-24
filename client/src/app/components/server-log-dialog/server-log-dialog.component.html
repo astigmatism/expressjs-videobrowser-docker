@@ -1,0 +1,9 @@
+<div class="log-dialog">
+    <button class="close-button" (click)="closeDialog()">❌</button>
+    <h3 (mousedown)="onDragStart($event)">💻 Server Logs</h3>
+    <div class="log-list">
+        <div *ngFor="let log of logs.slice().reverse()">
+            {{ log }}
+        </div>
+    </div>
+</div>

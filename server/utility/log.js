@@ -1,76 +1,38 @@
 //@ts-check
 'use-strict';
 const Readline = require('readline');
-const WebSocketService = require('../controllers/websockets');
 const Moment = require('moment');
+const LogBroadcast = require('./log.broadcast');
 
 module.exports = new (function() {
-
     let output;
 
-    this.getLastLog = () => {
-        return output;
-    }
+    const prependTime = () => Moment().format('DD MM YYYY hh:mm:ss');
 
-    const prependTime = () => {
-        return Moment().format('DD MM YYYY hh:mm:ss');
-    }
+    this.getLastLog = () => output;
 
-    this.INFO = (message) => {
-        output = prependTime() + ': INFO  ==> ' + message;
+    const write = (label, msg) => {
+        output = `${prependTime()}: ${label} ==> ${msg}`;
         console.log(output);
-        WebSocketService.ServerToClients('log', output);
+        LogBroadcast.broadcastLogToClients(output); // 🔥 Send to WebSocket clients
     };
 
-    this.CRITICAL = (message) => {
-        output = prependTime() + ': CRIT  ==> ' + message;
-        console.log(output);
-        WebSocketService.ServerToClients('log', output);
-    };
+    this.INFO = (msg) => write('INFO', msg);
+    this.CRITICAL = (msg) => write('CRIT', msg);
+    this.FILESYSTEM = (msg) => write('FILES', msg);
+    this.VIDEO = (msg) => write('VIDEO', msg);
+    this.IMAGE = (msg) => write('IMAGE', msg);
+    this.THUMB = (msg) => write('THUMB', msg);
 
-    this.REDIS = (message) => {
-        console.log('REDIS ==> ' + message);
-    };
-
-    this.CACHE = (message) => {
-        console.log('CACHE ==> ' + message);
-    };
-
-    this.FILESYSTEM = (message) => {
-        output = prependTime() + ': FILES ==> ' + message;
-        console.log(output);
-        WebSocketService.ServerToClients('log', output);
-    };
-
-    this.VIDEO = (message) => {
-        output = prependTime() + ': VIDEO ==> ' + message;
-        console.log(output);
-        WebSocketService.ServerToClients('log', output);
-    };
-
-    this.IMAGE = (message) => {
-        output = prependTime() + ': IMAGE ==> ' + message;
-        console.log(output);
-        WebSocketService.ServerToClients('log', output);
-    };
-
-    this.THUMB = (message) => {
-        output = prependTime() + ': THUMB ==> ' + message;
-        console.log(output);
-        WebSocketService.ServerToClients('log', output);
-    };
-
-    this.HBJS = (message) => {
-        // this log type rewrites the final line. no colors sadly
-        // @ts-ignore
-        Readline.clearLine(process.stdout);
+    this.HBJS = (msg) => {
+        Readline.clearLine(process.stdout, 0); // 0 = clear entire line
         Readline.cursorTo(process.stdout, 0);
-        process.stdout.write(message);
-        WebSocketService.ServerToClients('log', message);
-    }
+        process.stdout.write(msg);
+        LogBroadcast.broadcastLogToClients(msg);
+    };
 
-    this.HBJS_END = (message) => {
-        console.log(` ${message}`);
-        WebSocketService.ServerToClients('log', message);
-    }
-});
+    this.HBJS_END = (msg) => {
+        console.log(` ${msg}`);
+        LogBroadcast.broadcastLogToClients(msg);
+    };
+})();

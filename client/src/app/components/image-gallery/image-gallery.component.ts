@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, HostListener, EventEmitter, Output, ElementRef, ViewChild } from '@angular/core';
+import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
 import { IImage } from 'src/models/image';
 
@@ -99,7 +100,7 @@ export class ImageGalleryComponent implements OnInit {
     private countdownToHideControlsInMilliseconds = 2000;
     public isFillMode = false;
 
-    constructor() { }
+    constructor(private websocketService: WebsocketService) { }
 
     ngOnInit(): void { }
 
@@ -120,11 +121,33 @@ export class ImageGalleryComponent implements OnInit {
     }
 
     setGalleryImage(): void {
+        const image = this.images[this.currentImageIndex]
         this.imageScale = 1;
         this.imagePositionX = 0;
         this.imagePositionY = 0;
-        this.imageUrl = environment.apis.httpServer + '/' + this.images[this.currentImageIndex].url;
+        this.imageUrl = environment.apis.httpServer + '/' + image.url;
         this.updateImageDisplay();
+
+        this.websocketService.sendMetadataUpdate([{
+            action: 'increment',
+            target: 'views',
+            type: 'image',
+            fullname: image.fullname,
+            homePath: image.homePath
+        },{
+            action: 'set',
+            target: 'lastViewed',
+            value: new Date().toISOString(),
+            type: 'image',
+            fullname: image.fullname,
+            homePath: image.homePath
+        }]);
+        if (image.metadata) {
+            image.metadata.views = (image.metadata.views ?? 0) + 1;
+        }
+        if (image.metadata) {
+            image.metadata.lastViewed = new Date().toISOString();
+        }
     }
 
     toggleSlideShow(): void {

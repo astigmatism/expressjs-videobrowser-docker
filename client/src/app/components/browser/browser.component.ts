@@ -2,6 +2,7 @@ import { AfterViewInit, Component, EventEmitter, HostListener, OnInit, Output, C
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HttpService } from 'src/app/services/http/http.service';
+import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
 import { IFolder } from 'src/models/folder';
 import { IImage, Image as xImage } from 'src/models/image';
@@ -34,7 +35,7 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     public showFooter = false;
     public currentSort: string | undefined = undefined
 
-    constructor(private httpService: HttpService, private router: Router, private cdr: ChangeDetectorRef) { };
+    constructor(private httpService: HttpService, private router: Router, private cdr: ChangeDetectorRef, private websocketService: WebsocketService) { };
 
     ngOnInit(): void {
         this.currentPath = window.location.pathname;
@@ -63,8 +64,6 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     
                         // ✅ Pull sort from the server response if present
                         this.currentSort = this.listing.sortOption ?? 'name-asc';
-                        console.log('Current Sort:', this.currentSort);
-    
                         this.cdr.detectChanges();
                     });
                 },
@@ -77,6 +76,21 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     }
 
     folderClicked(folder: IFolder): void {
+        this.websocketService.sendMetadataUpdate([{
+            action: 'increment',
+            target: 'views',
+            type: 'folder',
+            fullname: folder.fullname,
+            homePath: this.currentPath
+        },{
+            action: 'set',
+            target: 'lastViewed',
+            value: new Date().toISOString(),
+            type: 'folder',
+            fullname: folder.fullname,
+            homePath: this.currentPath
+        }]);
+        
         const currentHref = location.href + (location.href.charAt(location.href.length - 1) === '/' ? '' : '/');
         let encodedFolderName = encodeURIComponent(folder.name)
         // Manually encode additional problematic characters

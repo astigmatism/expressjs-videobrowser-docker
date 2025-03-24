@@ -11,26 +11,84 @@ div.grid-item {
         cursor: pointer;
         position: relative;
 
-        .delete::after {
+        .delete {
             position: absolute;
-            top: 0px;
-            right: 0px;
+            top: 5px;
+            right: 5px;
             width: 20px;
             height: 20px;
-            font-size: 20px;
+            font-size: 10px;
             color: red;
-            content: '\00d7'; /* This will render the 'X' */
         }
     }
 
     .grid-item-footer {
 
-    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e95515+0,d35115+50,c54f0f+51,a05416+100 */
-    background: rgb(233,85,21); /* Old browsers */
-    background: -moz-linear-gradient(top,  rgba(233,85,21,1) 0%, rgba(211,81,21,1) 50%, rgba(197,79,15,1) 51%, rgba(160,84,22,1) 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(top,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(to bottom,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e95515', endColorstr='#a05416',GradientType=0 ); /* IE6-9 */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 8px;
+        height: 20px;
+        background: #eee; // adjust to match your app theme
 
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e95515+0,d35115+50,c54f0f+51,a05416+100 */
+        background: rgb(233,85,21); /* Old browsers */
+        background: -moz-linear-gradient(top,  rgba(233,85,21,1) 0%, rgba(211,81,21,1) 50%, rgba(197,79,15,1) 51%, rgba(160,84,22,1) 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom,  rgba(233,85,21,1) 0%,rgba(211,81,21,1) 50%,rgba(197,79,15,1) 51%,rgba(160,84,22,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e95515', endColorstr='#a05416',GradientType=0 ); /* IE6-9 */
+
+        .name {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding-right: 8px;
+        }
+        
+        .right-icons {
+            display: flex;
+            gap: 10px;
+        
+            .icon {
+                cursor: pointer;
+                user-select: none;
+                font-size: 10px;
+            }
+
+            .show-on-footer-hover {
+                opacity: 0;
+                transition: opacity 0.2s ease-in-out;
+            }
+
+            .info-icon-wrapper {
+                position: relative;
+            
+                .metadata-popup {
+                    position: absolute;
+                    bottom: 120%;
+                    left: 0;
+                    background: #fff;
+                    color: #333;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    padding: 8px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    z-index: 10;
+                    pointer-events: none;
+                }
+            }
+        }
     }
+}
+
+div.grid-item:hover .grid-item-footer .right-icons .show-on-footer-hover {
+    opacity: 1;
+}
+
+.emoji-grayscale {
+    filter: grayscale(50%);
+    opacity: 0.6;
 }

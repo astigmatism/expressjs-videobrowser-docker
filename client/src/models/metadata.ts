@@ -9,8 +9,7 @@ export interface IMetadata {
     createdAt: string;
     lastViewed: string | null;
     views: number;
-    favorite: number;
-    special: number;
+    spice: number;
     tags: string[];
     probe?: IProbe; // Optional, only for videos
 }

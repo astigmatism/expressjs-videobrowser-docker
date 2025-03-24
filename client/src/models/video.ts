@@ -28,6 +28,7 @@ export class Video implements IVideo {
     probe: IProbe;
     thumbnail: IThumbnail;
     spriteSheet: ISpriteSheet;
+    homePath: string;
     url: string;
     metadata?: IMetadata;
     
@@ -42,6 +43,7 @@ export class Video implements IVideo {
         this.url = video.url;
         this.logicalPath = video.logicalPath;
         this.metadata = video.metadata;
+        this.homePath = video.homePath
 
         this.probe = video.metadata?.probe ?? {
             width: 0,

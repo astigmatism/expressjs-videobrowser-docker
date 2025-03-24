@@ -20,12 +20,19 @@
                 <option value="createdAt-asc">Oldest</option>
                 <option value="lastViewed-desc">Last Viewed (Recent → Old)</option>
                 <option value="lastViewed-asc">Last Viewed (Old → Recent)</option>
-                <option value="favorite-desc">Favorites</option>
-                <option value="special-desc">Special</option>
+                <option value="spice-desc">Spice!</option>
             </select>
         </li>
-        <li *ngIf="showNewFolder" (click)="newFolder()">new folder</li>
-        <li *ngIf="showUpload" (click)="upload()">upload</li>
-        <li (click)="logout()">logout</li>
+        <li *ngIf="showNewFolder" (click)="newFolder()" title="New Folder">📁</li>
+        <li *ngIf="showUpload" (click)="upload()" title="Upload">⬆️</li>
+        <li class="settings-dropdown" (click)="toggleSettingsDropdown()" title="Settings">
+            ⚙️
+            <ul class="dropdown" *ngIf="showSettings">
+                <li (click)="toggleLogDialog($event)">💻 View Server Logs</li>
+                <li (click)="logout($event)">🚪 Logout</li>
+                <li (click)="clearMetadata($event)">🧹 Clear All Metadata</li>
+            </ul>
+        </li>
     </ol>
 </div>
+<app-server-log-dialog *ngIf="showLogDialog" (close)="showLogDialog = false"></app-server-log-dialog>

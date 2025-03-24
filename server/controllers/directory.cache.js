@@ -12,6 +12,11 @@ class DirectoryCache {
         this.cache = new Map();
     }
 
+    clearAll() {
+        this.cache.clear();
+        Log.INFO('🧹 Directory cache fully cleared');
+    }
+
     /**
      * Retrieves a directory listing from cache or generates a fresh one.
      * @param {string} path The directory path.
@@ -93,6 +98,7 @@ class DirectoryCache {
                     name: item,
                     path: filePath,
                     logicalPath: logicalPath,
+                    homePath: path,
                     metadata: itemMetadata
                 });
             }
@@ -111,6 +117,7 @@ class DirectoryCache {
                         url: imageUrl,
                         path: filePath,
                         logicalPath: logicalPath,
+                        homePath: path,
                         thumbnail: {
                             url: thumbnailUrl,
                             width: thumbnailSize ? thumbnailSize.width : 0,
@@ -122,11 +129,12 @@ class DirectoryCache {
                 if (Files.IsVideoFile(filePath)) {
                     const videoUrl = Path.join(path, `${item}.${videoRouteSuffix}`);
                     const coordinates = await Files.GetThumbnailCoordinates(path, item);
-    
+
                     let probe = itemMetadata?.probe;
-    
+
                     if (this._needsProbe(probe)) {
                         try {
+                            Log.INFO(`⚠️ Need to probe video ${filePath}. Please wait`)
                             const fetchedProbe = await ThumbnailMaker.ProbeStream(filePath);
                             probe = fetchedProbe;
     
@@ -139,7 +147,7 @@ class DirectoryCache {
                                 );
                             }
                         } catch (err) {
-                            Log.WARN(`⚠️ Failed to probe video ${filePath}: ${err.message}`);
+                            Log.INFO(`⚠️ Failed to probe video ${filePath}: ${err.message}`);
                             probe = {
                                 width: 0,
                                 height: 0,
@@ -154,6 +162,7 @@ class DirectoryCache {
                         fullname: fileParsed.base,
                         url: videoUrl,
                         path: filePath,
+                        homePath: path,
                         logicalPath,
                         thumbnail: {
                             url: thumbnailUrl,
@@ -182,11 +191,32 @@ class DirectoryCache {
     }
 
     _needsProbe(probe) {
-        return !probe ||
-            typeof probe.width !== 'number' ||
-            typeof probe.height !== 'number' ||
-            typeof probe.duration !== 'number' ||
-            typeof probe.display_aspect_ratio !== 'string';
+        if (!probe) {
+            console.log('📍 Probe is missing entirely');
+            return true;
+        }
+    
+        if (typeof probe.width !== 'number') {
+            console.log('📍 Probe is missing or has invalid width');
+            return true;
+        }
+    
+        if (typeof probe.height !== 'number') {
+            console.log('📍 Probe is missing or has invalid height');
+            return true;
+        }
+    
+        if (typeof probe.duration !== 'string') {
+            console.log('📍 Probe is missing or has invalid duration');
+            return true;
+        }
+    
+        if (typeof probe.display_aspect_ratio !== 'string') {
+            console.log('📍 Probe is missing or has invalid display_aspect_ratio');
+            return true;
+        }
+    
+        return false;
     }
 
     _sortBy(items, sortOption) {
@@ -200,8 +230,7 @@ class DirectoryCache {
     
             switch (key) {
                 case 'views':
-                case 'special':
-                case 'favorite':
+                case 'spice!':
                     aVal = aMeta[key] ?? 0;
                     bVal = bMeta[key] ?? 0;
                     break;
@@ -221,6 +250,30 @@ class DirectoryCache {
             if (aVal > bVal) return direction === 'desc' ? -1 : 1;
             return 0;
         });
+    }
+
+    updateCachedItemMetadata(dirPath, fullname, updates) {
+        dirPath = dirPath === '' ? '/' : dirPath;
+
+        const cached = this.cache.get(dirPath);
+        if (!cached) return;
+
+        const { listing } = cached;
+        const allItems = [...listing.folders, ...listing.images, ...listing.videos];
+
+        const target = allItems.find(item => item.fullname === fullname);
+        if (!target || !target.metadata) return;
+
+        Object.assign(target.metadata, updates);
+        Log.INFO(`⚡ Updated in-memory metadata for "${fullname}" in "${dirPath}"`);
+    }
+
+    refreshDirectoryCache(path) {
+        path = path === '' ? '/' : path;
+        if (this.cache.has(path)) {
+            this.cache.delete(path);
+            Log.INFO(`♻️ Refreshing directory cache for: ${path}`);
+        }
     }
 }
 

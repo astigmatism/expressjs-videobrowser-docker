@@ -14,9 +14,26 @@
         (click)="onClick($event)"
         (dragover)="$event.preventDefault()"
     >
-        <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)"></div>
+        <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)">❌</div>
     </div>
     <div class="grid-item-footer">
-        {{ image.name }}
+        <span class="name">{{ image.name }}</span>
+        <div class="right-icons">
+            <div title="Spice!" class="icon show-on-footer-hover" (click)="onSpiceClick($event)">🚀</div>
+            <div 
+                class="info-icon-wrapper show-on-footer-hover"
+                (click)="$event.stopPropagation()"
+                (mouseover)="showMetadata = true"
+                (mouseout)="showMetadata = false"
+                >
+                ℹ️
+                <div class="metadata-popup" *ngIf="showMetadata" (click)="$event.stopPropagation()">
+                    <div><strong>Created:</strong> {{ getCreatedAgo() }}</div>
+                    <div><strong>Last Viewed:</strong> {{ getLastOpenedAgo() }}</div>
+                </div>
+            </div>
+            <div>{{ image.metadata?.spice }} <span class="emoji-grayscale">🚀</span></div>
+            <div>{{ image.metadata?.views }} <span class="emoji-grayscale">▶️</span></div>
+        </div>
     </div>
 </div>

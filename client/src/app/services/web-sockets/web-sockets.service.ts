@@ -1,57 +1,106 @@
 import { Injectable } from "@angular/core";
-import { Observable, Observer } from 'rxjs';
+import { Observable, Observer, Subject } from 'rxjs';
 import { AnonymousSubject } from 'rxjs/internal/Subject';
-import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from "src/environments/environment";
-import { Message } from "src/models/websockets";
+import { Message, MessageType, MetadataUpdatePayload } from "src/models/websockets";
 
 const webSocketServerUrl = environment.apis.wsServer;
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class WebsocketService {
-    
-    private subject!: AnonymousSubject<MessageEvent>;
-    public messages: Subject<Message>;
+    private subject: AnonymousSubject<Message>;
+    public messages$ = new Subject<Message>();
+
+    private logMessages: string[] = [];
+    private logStream$ = new Subject<string[]>();
 
     constructor() {
-        this.messages = <Subject<Message>>this.connect(webSocketServerUrl).pipe(
-            map(
-                (response: MessageEvent): Message => {
-                    // console.log(response.data);
-                    let data = JSON.parse(response.data)
-                    return data;
-                }
-            )
-        );
-    }
-
-    public connect(url: string): AnonymousSubject<MessageEvent> {
-        if (!this.subject) {
-            this.subject = this.create(url);
-            console.log("Successfully connected: " + url);
+        const savedLogs = sessionStorage.getItem('serverLogs');
+        if (savedLogs) {
+            this.logMessages = JSON.parse(savedLogs);
+            this.logStream$.next([...this.logMessages]);
         }
-        return this.subject;
+    
+        this.subject = this.create(webSocketServerUrl);
+    
+        this.subject.subscribe({
+            next: (msg: Message) => {
+    
+                if (msg.command === MessageType.LOG && typeof msg.content === 'string') {
+                    this.appendLogMessage(msg.content);
+                }
+    
+                this.messages$.next(msg);
+            },
+            error: (err: unknown) => {
+                console.error('WebSocket error:', err);
+            },
+            complete: () => {
+                console.warn('WebSocket closed');
+            }
+        });
     }
 
-    private create(url: string): AnonymousSubject<MessageEvent> {
-        let ws = new WebSocket(url);
-        let observable = new Observable((obs: Observer<MessageEvent>) => {
-            ws.onmessage = obs.next.bind(obs);
-            ws.onerror = obs.error.bind(obs);
-            ws.onclose = obs.complete.bind(obs);
-            return ws.close.bind(ws);
-        });
-        let observer = {
-            error: () => {},
-            complete: () => {},
-            next: (data: Object) => {
-                console.log('Message sent to websocket: ', data);
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify(data));
+    private create(url: string): AnonymousSubject<Message> {
+        const ws = new WebSocket(url);
+
+        const observable = new Observable<Message>((observer: Observer<Message>) => {
+            ws.onmessage = (event: MessageEvent) => {
+                try {
+                    const data: Message = JSON.parse(event.data);
+                    observer.next(data);
+                } catch (err: unknown) {
+                    console.error('❌ Failed to parse incoming WS message:', err);
                 }
-            }
+            };
+
+            ws.onerror = (err: Event) => observer.error(err);
+            ws.onclose = () => observer.complete();
+
+            return () => ws.close();
+        });
+
+        const observer = {
+            next: (data: Message) => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    console.log('📤 Sent to WebSocket:', data);
+                    ws.send(JSON.stringify(data));
+                } else {
+                    console.warn("⚠️ WebSocket not open. Message not sent:", data);
+                }
+            },
+            error: () => {},
+            complete: () => {}
         };
-        return new AnonymousSubject<MessageEvent>(observer, observable);
+
+        return new AnonymousSubject<Message>(observer, observable);
+    }
+
+    public sendMetadataUpdate(payloads: MetadataUpdatePayload[]): void {
+        const message: Message<MetadataUpdatePayload[]> = {
+            source: 'client',
+            command: MessageType.METADATA_UPDATE,
+            content: payloads
+        };
+    
+        this.subject.next(message);
+    }
+
+    public getLogs(): Observable<string[]> {
+        return this.logStream$.asObservable();
+    }
+
+    private appendLogMessage(newLog: string): void {
+        this.logMessages.unshift(newLog);
+    
+        if (this.logMessages.length > 500) {
+            this.logMessages.pop();
+        }
+    
+        // Save to sessionStorage
+        sessionStorage.setItem('serverLogs', JSON.stringify(this.logMessages));
+    
+        // Emit a new copy
+        this.logStream$.next([...this.logMessages]);
     }
 }

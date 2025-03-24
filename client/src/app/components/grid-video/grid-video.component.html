@@ -23,7 +23,7 @@
             (click)="onBadgeClick($event)"
         >{{ video.resolutionClass }}</div>
 
-        <div *ngIf="canDelete" [hidden]="!canShowDeleteIcon()" class="delete" (click)="deleteRequest($event)"></div>
+        <div *ngIf="canDelete" [hidden]="!canShowDeleteIcon()" class="delete" (click)="deleteRequest($event)">❌</div>
     </div>
     <div class="video-wrapper" [hidden]="!videoPlaying" [style.maxHeight.px]="video.thumbnail.height">
         <video 
@@ -43,16 +43,38 @@
     </div>
 
     <div class="grid-item-footer" (click)="onFooterClick($event)">
-        <ng-container *ngIf="!scrubbingEnabledForThumbnail && !scrubbingEnabledForPlay">
+        <div class="details-row" *ngIf="!scrubbingEnabledForThumbnail && !scrubbingEnabledForPlay">
             <span class="name">{{ video.name }}</span>
             <span>{{ duration }}</span>
-        </ng-container>
-        <ng-container *ngIf="scrubbingEnabledForThumbnail">
+        </div>
+        <div *ngIf="scrubbingEnabledForThumbnail">
             Scrubbing: Click to set thumbnail
-        </ng-container>
-        <ng-container *ngIf="scrubbingEnabledForPlay">
+        </div>
+        <div *ngIf="scrubbingEnabledForPlay">
             Scrubbing: Click to begin play
-        </ng-container>
-            
+        </div>
+        <div class="icon-row">
+            <div class="left-icons">
+                <div title="Spice!" class="show-on-footer-hover" (click)="onSpiceClick($event)">🚀</div>
+                <div title="Scrub to Play" class="show-on-footer-hover">🎯</div>
+                <div title="Set Thumbnail" class="show-on-footer-hover" (click)="onBadgeClick($event)">🖼️</div>
+                <div 
+                    class="info-icon-wrapper show-on-footer-hover"
+                    (click)="$event.stopPropagation()"
+                    (mouseover)="showMetadata = true"
+                    (mouseout)="showMetadata = false"
+                    >
+                    ℹ️
+                    <div class="metadata-popup" *ngIf="showMetadata" (click)="$event.stopPropagation()">
+                        <div><strong>Created:</strong> {{ getCreatedAgo() }}</div>
+                        <div><strong>Last Viewed:</strong> {{ getLastOpenedAgo() }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="right-icons">
+                <div>{{ video.metadata?.spice }} <span class="emoji-grayscale">🚀</span></div>
+                <div>{{ video.metadata?.views }} <span class="emoji-grayscale">▶️</span></div>
+            </div>
+        </div>
     </div>
- </div>
+</div>

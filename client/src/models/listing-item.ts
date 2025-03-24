@@ -5,6 +5,7 @@ export interface IListingItem
     fullname: string
     name: string
     logicalPath: string
+    homePath: string
     metadata?: IMetadata;
 }
 
@@ -12,6 +13,7 @@ export class ListingItem implements IListingItem {
     fullname: string = '';
     name: string = '';
     logicalPath: string = '';
+    homePath: string = '';
     metadata?: IMetadata;
 }
 

@@ -49,6 +49,11 @@ export class HttpService {
         return this.httpClient.post<string>(this.httpServer + environment.apis.application.processMedia, {});
     }
 
+    clearMetadataAndCache() {
+        const url = `${environment.apis.httpServer}/clear-metadata`;
+        return this.httpClient.post<{ message: string }>(url, {});
+    }
+
     fixedEncodeURIComponent(str: string): string {
         return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
             return '%' + c.charCodeAt(0).toString(16).toUpperCase();

@@ -1,0 +1,49 @@
+.log-dialog {
+  position: fixed;
+  z-index: 1000;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  width: 800px;
+  max-height: 80vh;
+  overflow: auto; /* 🔁 Changed to allow full resize, not just vertical */
+  cursor: move;
+  user-select: none;
+  border-radius: 6px;
+
+  resize: both; /* ✅ Enable resizable grab handles */
+  min-width: 300px;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.log-list {
+  font-family: monospace;
+  font-size: 0.85rem;
+  max-height: 60vh;
+  overflow-y: hidden;
+}
+  
+  .log-dialog h3 {
+    margin-top: 0;
+    font-size: 16px;
+  }
+  
+  .log-list > div {
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    font-size: .8rem;
+    cursor: pointer;
+  }

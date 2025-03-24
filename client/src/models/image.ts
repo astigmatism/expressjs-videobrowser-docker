@@ -1,4 +1,5 @@
 import { IListingItem } from "./listing-item";
+import { IMetadata } from "./metadata";
 import { IThumbnail } from "./thumbnail";
 
 export interface IImage extends IListingItem {
@@ -12,6 +13,8 @@ export class Image implements IImage {
     url: string;
     thumbnail: IThumbnail;
     logicalPath: string;
+    homePath: string;
+    metadata?: IMetadata | undefined;
 
     constructor(image: IImage) {
         this.name = image.name;
@@ -19,6 +22,8 @@ export class Image implements IImage {
         this.url = image.url;
         this.thumbnail = image.thumbnail;
         this.logicalPath = image.logicalPath;
+        this.homePath = image.homePath;
+        this.metadata = image.metadata;
     }
 
     static isImage(listingItem: IListingItem): boolean {

@@ -44,4 +44,30 @@
             }
         }
     }
+
+    .settings-dropdown {
+        position: relative;
+        cursor: pointer;
+    
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            list-style: none;
+            padding: 4px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            color: black;
+            font-size: 14px;
+    
+            li {
+                padding: 4px 12px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+        }
+    }
 }
