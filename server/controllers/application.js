@@ -267,7 +267,6 @@ module.exports = new (function() {
                 name: file.name,
                 relativePath: Path.join(path, file.name)
             });
-            console.log('fileProcessingQueue', fileProcessingQueue)
         }
 
         notifyQueueUpdated(); // Send to WebSocket clients
