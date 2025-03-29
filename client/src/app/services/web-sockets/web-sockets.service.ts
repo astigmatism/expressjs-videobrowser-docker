@@ -25,7 +25,8 @@ export class WebsocketService {
     
         this.subject.subscribe({
             next: (msg: Message) => {
-    
+                console.log('🌐 Incoming WebSocket message:', msg);
+
                 if (msg.command === MessageType.LOG && typeof msg.content === 'string') {
                     this.appendLogMessage(msg.content);
                 }

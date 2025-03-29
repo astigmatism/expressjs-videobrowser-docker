@@ -25,14 +25,15 @@
         </li>
         <li *ngIf="showNewFolder" (click)="newFolder()" title="New Folder">📁</li>
         <li *ngIf="showUpload" (click)="upload()" title="Upload">⬆️</li>
+        <li (click)="logout($event)">🚪</li>
+        <!--
         <li class="settings-dropdown" (click)="toggleSettingsDropdown()" title="Settings">
             ⚙️
             <ul class="dropdown" *ngIf="showSettings">
-                <li (click)="toggleLogDialog($event)">💻 View Server Logs</li>
-                <li (click)="logout($event)">🚪 Logout</li>
+                
                 <li (click)="clearMetadata($event)">🧹 Clear All Metadata</li>
             </ul>
         </li>
+        -->
     </ol>
 </div>
-<app-server-log-dialog *ngIf="showLogDialog" (close)="showLogDialog = false"></app-server-log-dialog>

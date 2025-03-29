@@ -25,6 +25,10 @@ module.exports = new (function() {
     let conversionProcessInProgress = false;
     let conversionProcessQueued = false;
 
+    let fileProcessingQueue = [];
+    let processingStage = null;
+    let currentlyProcessingFile = null;
+
     // public methods
 
     this.ApplicationStart = async function(callback) {
@@ -79,6 +83,8 @@ module.exports = new (function() {
     
         Log.INFO(`🔄 Starting media processing...`);
         conversionProcessInProgress = true;
+        processingStage = '🚚'
+        notifyQueueUpdated();
     
         try {
             Log.INFO(`🕵️ Ensuring all files are fully written before processing...`);
@@ -92,6 +98,7 @@ module.exports = new (function() {
             Log.CRITICAL(`🔥 Error during media processing: ${error.message}`);
         } finally {
             conversionProcessInProgress = false;
+            notifyQueueUpdated();
         }
     
         if (conversionProcessQueued) {
@@ -157,16 +164,30 @@ module.exports = new (function() {
                     const parsedFile = Path.parse(itemPath);
                     await Fse.ensureDir(Path.join(mediaOutputRoot, currentFolder));
                     await Fse.ensureDir(Path.join(thumbnailsRoot, currentFolder));
+
+                    currentlyProcessingFile = Path.join(currentFolder, parsedFile.base);
+                    fileProcessingQueue = fileProcessingQueue.filter(f => f.relativePath !== `/${currentlyProcessingFile}`);
+                    processingStage = '⚙️'
+                    notifyQueueUpdated();
     
                     // Process video files
                     if (Files.IsVideoFile(itemPath)) {
                         try {
+                            // convert video
                             const outputPath = await VideoConversion.ProcessFile(itemPath, currentFolder, parsedFile);
                             if (deleteFileWhenDone) await Fse.remove(itemPath);
+                            // gen thumbnails
+                            processingStage = '🖼️'
+                            notifyQueueUpdated();
                             await ThumbnailMaker.ProcessVideoFile(outputPath, currentFolder);
                         } catch (error) {
                             Log.CRITICAL(`🚨 Video Processing Failed: ${itemPath} - ${error.message}`);
                         }
+
+                        currentlyProcessingFile = null;
+                        processingStage = null;
+                        notifyQueueUpdated();
+
                         DirectoryCache.invalidateCache(Path.join('/', currentFolder));
                         continue;
                     }
@@ -176,11 +197,19 @@ module.exports = new (function() {
                         try {
                             Log.IMAGE(`Copying image file to output folder "${itemPath}"`);
                             await Fse.copyFile(itemPath, Path.join(mediaOutputRoot, currentFolder, parsedFile.base));
+
+                            processingStage = '🖼️'
+                            notifyQueueUpdated();
                             await ThumbnailMaker.ProcessImageFile(itemPath, currentFolder);
                             if (deleteFileWhenDone) await Fse.remove(itemPath);
                         } catch (error) {
                             Log.CRITICAL(`🚨 Image Processing Failed: ${itemPath} - ${error.message}`);
                         }
+
+                        currentlyProcessingFile = null;
+                        processingStage = null;
+                        notifyQueueUpdated();
+
                         DirectoryCache.invalidateCache(Path.join('/', currentFolder));
                         continue;
                     }
@@ -232,10 +261,28 @@ module.exports = new (function() {
                     Log.CRITICAL(`Error extracting ZIP: ${e.message}`);
                 }
             }
+
+            // ✅ Add to processing queue
+            fileProcessingQueue.push({
+                name: file.name,
+                relativePath: Path.join(path, file.name)
+            });
+            console.log('fileProcessingQueue', fileProcessingQueue)
         }
+
+        notifyQueueUpdated(); // Send to WebSocket clients
     
         // ✅ Use a manual debounce mechanism
         triggerMediaProcessing();
+    };
+
+    const notifyQueueUpdated = () => {
+        WebSocketService.ServerToClients('queue-update', {
+            isProcessing: conversionProcessInProgress,
+            processingStage: processingStage,
+            currentProcessingFile: currentlyProcessingFile,
+            queue: fileProcessingQueue.map(f => f.name)
+        });
     };
     
     // ✅ Manual debounce function using setTimeout()

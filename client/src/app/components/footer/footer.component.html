@@ -1,3 +1,30 @@
 <div class="footer">
-    <div class="message"></div>
+    <ol>
+        <li class="conversion-indicator">
+            <div
+                class="progress-bar"
+                [ngClass]="{ 'active': isProcessing }"
+                [style.--progress]="(conversionPercent ?? 0) + '%'"
+            ></div>
+            <div class="conversion-details" *ngIf="isProcessing">
+                <div><strong>Currently Processing:</strong> {{ currentProcessingFile || '...' }}</div>
+                <div><strong>Progress:</strong> {{ conversionPercent ? (conversionPercent?.toFixed(1) + '%') : '...'}}</div>
+                <div><strong>ETA:</strong> {{ conversionETA || '...' }}</div>
+                <div *ngIf="hasProgressingQueue">
+                <strong>Queued Items:</strong>
+                <div *ngFor="let item of processingQueue">{{ item }}</div>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="header-eta">{{ processingStage || ''}} {{ currentProcessingFile || '' }}</div>
+        </li>
+        <li>
+            <div class="header-eta">{{ conversionETA ? formattedConversionETA : '' }}</div>
+        </li>
+    </ol>
+    <ol class="right-options">
+        <li (click)="toggleLogDialog($event)">💻</li>
+    </ol>
 </div>
+<app-server-log-dialog *ngIf="showLogDialog" (close)="showLogDialog = false"></app-server-log-dialog>

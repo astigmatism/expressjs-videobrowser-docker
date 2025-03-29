@@ -18,7 +18,7 @@
         (onMoveRequest)="onMoveRequest($event)"
     >
     </app-grid>
-    <app-footer *ngIf="showFooter" [initialMessage]="initialServerState.log"></app-footer>
+    <app-footer *ngIf="showFooter"></app-footer>
     <app-image-gallery *ngIf="galleryActive"
         [path]="listing.path" 
         [images]="listing.images"

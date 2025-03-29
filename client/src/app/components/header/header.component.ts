@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { HttpService } from 'src/app/services/http/http.service';
 import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
@@ -32,18 +32,21 @@ export class HeaderComponent implements OnInit, OnChanges {
     public showNewFolder = environment.application.showNewFolder;
     public currentSortOption = 'name-asc'; // Default sort
     public showSettings = false;
-    public showLogDialog = false;
 
-    constructor(private webSocketService: WebsocketService, private httpService: HttpService) {
+    constructor(private webSocketService: WebsocketService, private httpService: HttpService, private cdRef: ChangeDetectorRef) {
         webSocketService.messages$.subscribe((message: Message) => {
-            if (message.command === MessageType.LOG) {
-                this.message = message.content;
+            switch (message.command) {
+                case MessageType.LOG:
+                    this.message = message.content;
+                    break;
             }
+            this.cdRef.detectChanges();
         });
     }
 
     ngOnInit(): void {
-        this.message = this.initialMessage;
+        this.message = this.initialMessage;       
+
         if (this.sortOption && this.sortOption !== 'name-asc') {
             this.currentSortOption = this.sortOption;
         }
@@ -77,12 +80,6 @@ export class HeaderComponent implements OnInit, OnChanges {
     
     newFolder(): void {
         this.onNewFolderClicked.emit();
-    }
-
-    toggleLogDialog(event: MouseEvent): void {
-        this.showLogDialog = !this.showLogDialog;
-        this.showSettings = false; // 🔹 Collapse the settings menu
-        event.stopPropagation();   // Optional: prevents bubbling in some cases
     }
 
     toggleSettingsDropdown(): void {

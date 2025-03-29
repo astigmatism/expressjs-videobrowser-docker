@@ -3,7 +3,11 @@
     position: fixed;
     bottom: 0px;
     width: 100%;
-    height: 20px;
+    height: 40px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
     /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#99bbf1+0,a4cdf8+49,b3d6f7+50,bdddf9+100 */
     background: rgb(153,187,241); /* Old browsers */
@@ -12,10 +16,95 @@
     background: linear-gradient(to bottom,  rgba(153,187,241,1) 0%,rgba(164,205,248,1) 49%,rgba(179,214,247,1) 50%,rgba(189,221,249,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#99bbf1', endColorstr='#bdddf9',GradientType=0 ); /* IE6-9 */
 
-    .message {
-        line-height: 20px;
-        padding: 0 20px;
-        font-size: 12px;
-        text-overflow: ellipsis;
+    ol {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 20px;
+    
+        display: flex;              // <-- Flex container
+        align-items: center;        // <-- Vertically center children
+        height: 100%;               // <-- Take full height of parent
+    
+        li {
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 20px;
+        }
     }
+
+    .right-options {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+
+        li {
+            margin: 0 0 0 20px;
+
+            select {
+                height: 30px;
+                border-radius: 4px;
+                padding: 4px;
+            }
+        }
+    }
+
+    .header-eta {
+        font-size: 14px;
+    }
+
+    .conversion-indicator {
+        position: relative;
+        width: 100px;
+        height: 100%;
+        display: flex;
+        align-items: center;     // Vertical centering
+        justify-content: center; // Horizontal centering (not required but useful)
+      
+        &:hover .conversion-details {
+          display: block;
+        }
+      
+        .progress-bar {
+          margin-top: 12px;
+          width: 100%;
+          height: 16px;
+          background-color: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .progress-bar.active {
+            background-color: lightcoral; // Red background while active
+          }
+      
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--progress, 0%);
+            background-color: lightgreen; // <--- This is the actual color you’ll see
+            transition: width 0.4s ease;
+        }
+      
+        .conversion-details {
+          position: absolute;
+          bottom: 50px;
+          left: 0;
+          background: white;
+          color: black;
+          border-radius: 6px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          padding: 10px;
+          font-size: 13px;
+          z-index: 1000;
+          width: 500px;
+          display: none;
+          white-space: normal;
+          line-height: 20px;
+          text-overflow: ellipsis;
+        }
+      }
 }

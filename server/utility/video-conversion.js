@@ -6,6 +6,7 @@ const Path = require('path');
 const { exec } = require('child_process');
 const Log = require('../utility/log');
 const Hbjs = require('handbrake-js');
+const WebSocketService = require('../controllers/websockets');
 
 module.exports = new (function() {
 
@@ -97,9 +98,17 @@ module.exports = new (function() {
                     Log.CRITICAL(err);
                 })
                 .on('progress', (progress) => {
+                    WebSocketService.ServerToClients('conversion-progress', {
+                        percent: progress.percentComplete,
+                        eta: progress.eta
+                    });
                     Log.HBJS(`${progress.percentComplete.toFixed(2)}%, ETA: ${progress.eta}, ${sourceFile}`);
                 })
                 .on('complete', () => {
+                    WebSocketService.ServerToClients('conversion-progress', {
+                        percent: '',
+                        eta: ''
+                    });
                     Log.HBJS_END(`complete!`);
                     resolve(sourceFile);
                 })

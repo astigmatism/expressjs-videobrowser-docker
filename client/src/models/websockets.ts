@@ -1,6 +1,8 @@
 export enum MessageType {
     LOG = 'log',
     METADATA_UPDATE = 'metadata-update',
+    QUEUE_UPDATE = 'queue-update',
+    CONVERSION_PROGRESS = 'conversion-progress',
     // Add more types as needed
 }
 
