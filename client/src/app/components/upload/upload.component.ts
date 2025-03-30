@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { Subscription } from 'rxjs';
 import { HttpEventType } from '@angular/common/http';
 import { HttpService } from 'src/app/services/http/http.service';
+import { IUploadAction, UploadType } from 'src/models/uploads';
 
 @Component({
     selector: 'app-upload',
@@ -9,7 +10,7 @@ import { HttpService } from 'src/app/services/http/http.service';
     styleUrls: ['./upload.component.scss']
 })
 export class UploadComponent implements OnInit, OnDestroy {
-    @Input() path!: string;
+    @Input() uploadAction!: IUploadAction;
     @Output() onFileUpload = new EventEmitter<File[]>();
     @Output() closeUploadRequest = new EventEmitter<boolean>();
 
@@ -93,7 +94,13 @@ export class UploadComponent implements OnInit, OnDestroy {
         const currentFile = this.files[this.currentFileIndex];
         console.log(`[${new Date().toISOString()}] 📂 Starting upload for: ${currentFile.name}`);
 
-        this.activeUploadSubscription = this.httpService.fileUpload([currentFile], this.path).subscribe({
+        if (this.uploadAction.path == null) {
+            throw 'this.uploadAction.path is null'
+        }
+
+        console.log('this.uploadAction.path', this.uploadAction.path)
+
+        this.activeUploadSubscription = this.httpService.fileUpload([currentFile], this.uploadAction.path, this.uploadAction.type).subscribe({
             next: (event) => {
                 if (this.uploadCancelled) {
                     console.log(`[${new Date().toISOString()}] ⚠️ Upload cancelled at file: ${currentFile.name}`);

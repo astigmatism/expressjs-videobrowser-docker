@@ -10,6 +10,17 @@
     (dragleave)="onDragLeave($event)"
     (drop)="onDrop($event)">
 
+    <!-- 📁 Icon Container with thumbnail layering -->
+    <div class="folder-icon-container">
+        <!-- 🖼️ Embedded Thumbnail (semi-transparent) -->
+        <img 
+        *ngIf="folder.embeddedThumbnail"
+        [src]="folder.embeddedThumbnail"
+        class="folder-thumbnail"
+        alt="Folder thumbnail"
+        />
+    </div>
+
     <div class="title">{{ folder.name }}</div>
     <div *ngIf="canDelete" [hidden]="!mouseOver" class="delete" (click)="deleteRequest($event)">❌</div>
     <div
@@ -24,5 +35,12 @@
             <div><strong>Created:</strong> {{ getCreatedAgo() }}</div>
             <div><strong>Last Opened:</strong> {{ getLastOpenedAgo() }}</div>
         </div>
+    </div>
+    <div
+        [hidden]="!mouseOver"
+        class="thumb-icon"
+        (click)="upload($event)"
+    >
+        🖼️
     </div>
 </div>

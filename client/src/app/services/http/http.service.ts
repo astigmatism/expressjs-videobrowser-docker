@@ -5,6 +5,7 @@ import { IListing } from 'src/models/listing';
 import { Observable } from 'rxjs';
 import { ISetThumbnailData } from 'src/models/thumbnail';
 import { IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
+import { UploadType } from 'src/models/uploads';
 
 @Injectable({
     providedIn: 'root'
@@ -60,7 +61,7 @@ export class HttpService {
         });
     }
 
-    fileUpload(files: File[], path: string): Observable<any> {
+    fileUpload(files: File[], path: string, uploadType: UploadType): Observable<any> {
         const formData = new FormData();
     
         files.forEach(file => {
@@ -68,6 +69,7 @@ export class HttpService {
         });
     
         formData.append('path', path);
+        formData.append('uploadType', uploadType);
     
         return this.httpClient.post<string>(this.httpServer + environment.apis.uploads, formData, {
             observe: 'events',       // 🔥 Enables progress updates

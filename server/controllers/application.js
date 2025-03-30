@@ -237,42 +237,90 @@ module.exports = new (function() {
 
     let processingTimeout = null; // Holds reference to the delayed trigger
 
-    this.FileUploaded = async (files, path) => {
+    this.FileUploaded = async (files, path, uploadType) => {
         const destinationFolder = Path.join(mediaInputRoot, path);
         await Fse.ensureDir(destinationFolder);
     
-        for (const file of files) {
-            const destinationFile = Path.join(destinationFolder, file.name);
-            const parsedFile = Path.parse(destinationFile);
-    
-            Log.FILESYSTEM(`Writing file to input folder: ${destinationFile}`);
-            const writtenFile = await writeFileChunked(destinationFile, file.data);
-            console.log(`File written successfully: ${writtenFile}`);
-    
-            if (parsedFile.ext === '.zip') {
-                const zipExtractionFolder = Path.join(destinationFolder, parsedFile.name);
-                const absoluteZipExtractionFolder = Path.resolve(zipExtractionFolder);
-                await Fse.ensureDir(zipExtractionFolder);
-    
-                Log.FILESYSTEM(`New file is zip, extracting to: ${zipExtractionFolder}`);
-                try {
-                    await Extract(destinationFile, { dir: absoluteZipExtractionFolder });
-                } catch (e) {
-                    Log.CRITICAL(`Error extracting ZIP: ${e.message}`);
+        console.log(uploadType)
+        switch (uploadType) {
+
+            case 'folderThumb':
+                if (files.length !== 1) {
+                    Log.CRITICAL(`Expected 1 file for folder thumbnail, but received ${files.length}.`);
+                    break;
                 }
-            }
 
-            // ✅ Add to processing queue
-            fileProcessingQueue.push({
-                name: file.name,
-                relativePath: Path.join(path, file.name)
-            });
+                const file = files[0];
+                const tempInputPath = Path.join(workingFolder, 'folderThumb', file.name);
+                const targetThumbFolder = Path.join(thumbnailsRoot, path);
+                const parsed = Path.parse(file.name);
+                const tempOutputPath = Path.join(targetThumbFolder, `${parsed.name}.${Config.get('thumbnails.ext')}`);
+                const finalOutputPath = Path.join(targetThumbFolder, `_thumbnail.${Config.get('thumbnails.ext')}`);
+
+                try {
+                    // Ensure folders exist
+                    await Fse.ensureDir(Path.dirname(tempInputPath));
+                    await Fse.ensureDir(targetThumbFolder);
+
+                    // Write file to working folder
+                    await writeFileChunked(tempInputPath, file.data);
+
+                    // Generate thumbnail (will use source filename + .ext)
+                    Log.INFO(`Generating thumbnail for folder using ${tempInputPath}`);
+                    const generatedThumbPath = await ThumbnailMaker.ProcessImageFile(tempInputPath, path);
+
+                    // Move or rename it to _thumbnail
+                    if (generatedThumbPath !== finalOutputPath) {
+                        await Fse.move(generatedThumbPath, finalOutputPath, { overwrite: true });
+                    }
+
+                    Log.INFO(`✅ Folder thumbnail created at ${finalOutputPath}`);
+                    DirectoryCache.invalidateCache(Path.dirname(path));
+                } catch (err) {
+                    Log.CRITICAL(`Failed to create folder thumbnail: ${err.message}`);
+                }
+
+                break;
+
+            case 'media':
+
+                for (const file of files) {
+                    const destinationFile = Path.join(destinationFolder, file.name);
+                    const parsedFile = Path.parse(destinationFile);
+            
+                    Log.FILESYSTEM(`Writing file to input folder: ${destinationFile}`);
+                    const writtenFile = await writeFileChunked(destinationFile, file.data);
+                    console.log(`File written successfully: ${writtenFile}`);
+            
+                    if (parsedFile.ext === '.zip') {
+                        const zipExtractionFolder = Path.join(destinationFolder, parsedFile.name);
+                        const absoluteZipExtractionFolder = Path.resolve(zipExtractionFolder);
+                        await Fse.ensureDir(zipExtractionFolder);
+            
+                        Log.FILESYSTEM(`New file is zip, extracting to: ${zipExtractionFolder}`);
+                        try {
+                            await Extract(destinationFile, { dir: absoluteZipExtractionFolder });
+                        } catch (e) {
+                            Log.CRITICAL(`Error extracting ZIP: ${e.message}`);
+                        }
+                    }
+
+                    // ✅ Add to processing queue
+                    fileProcessingQueue.push({
+                        name: file.name,
+                        relativePath: Path.join(path, file.name)
+                    });
+                }
+
+                notifyQueueUpdated(); // Send to WebSocket clients
+            
+                // ✅ Use a manual debounce mechanism
+                triggerMediaProcessing();
+                break;
+            default:
+                Log.CRITICAL(`Upload file requested but arrived with a known type: ${uploadType}`);
+                break;
         }
-
-        notifyQueueUpdated(); // Send to WebSocket clients
-    
-        // ✅ Use a manual debounce mechanism
-        triggerMediaProcessing();
     };
 
     const notifyQueueUpdated = () => {

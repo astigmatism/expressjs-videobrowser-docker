@@ -74,6 +74,7 @@ Router.post('/setThumbnail', isAuthorized, AsyncHandler(async (req, res, next) =
 
 Router.post('/upload', isAuthorized, AsyncHandler(async (req, res, next) => {
     const path = req.body.path || '';
+    const uploadType = req.body.uploadType || '';
 
     if (!req.files || !req.files.file) {
         return res.status(400).json({ message: 'No files uploaded' });
@@ -82,7 +83,7 @@ Router.post('/upload', isAuthorized, AsyncHandler(async (req, res, next) => {
     const files = Array.isArray(req.files.file) ? req.files.file : [req.files.file];
 
     // ✅ Fire and forget: File uploads now trigger processing with a debounce delay
-    Application.FileUploaded(files, path)
+    Application.FileUploaded(files, path, uploadType)
         .catch(error => Log.CRITICAL(`Error in FileUploaded: ${error.message}`));
 
     res.json({ message: 'Files uploaded successfully and processing started' });

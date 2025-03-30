@@ -4,7 +4,7 @@
         [sortOption]="currentSort"
         (onPathClicked)="pathClicked($event)"
         (onLogoutClicked)="logout()"
-        (onUploadClicked)="upload()"
+        (onUploadClicked)="upload($event)"
         (onNewFolderClicked)="newFolder()"
         (onMoveRequest)="onMoveRequest($event)"
         (onSortChanged)="handleSortChanged($event)"
@@ -12,6 +12,7 @@
     <app-grid 
         [listing]="listing"
         [movedItem]="movedItem"
+        (onUploadClicked)="upload($event)"
         (onFolderClick)="folderClicked($event)"
         (onImageClick)="imageClicked($event)"
         (onDeleteRequest)="onDeleteRequest($event)"
@@ -26,7 +27,7 @@
         (closeGalleryRequest)="onGalleryClose()"
     ></app-image-gallery>
     <app-upload *ngIf="uploadDialogActive"
-        [path]="listing.path"
+        [uploadAction]="uploadAction"
         (closeUploadRequest)="onUploadClose()"
     ></app-upload>
     <app-new-folder *ngIf="newFolderDialogActive"

@@ -93,13 +93,26 @@ class DirectoryCache {
 
 
             if (isDirectory) {
+                const folderThumbPath = Path.join(thumbnailRoot, logicalPath, `_thumbnail.${thumbnailExt}`);
+                const folderThumbUrl = Path.join(path, item, `_thumbnail.${thumbnailExt}.${thumbnailRouteSuffix}`);
+                
+                let embeddedThumbnail = null;
+                if (await Fse.pathExists(folderThumbPath)) {
+                    const buffer = await Fse.readFile(folderThumbPath);
+                    const base64 = buffer.toString('base64');
+                    const mimeType = `image/${thumbnailExt === 'jpg' ? 'jpeg' : thumbnailExt}`;
+                    embeddedThumbnail = `data:${mimeType};base64,${base64}`;
+                }
                 result.folders.push({
                     fullname: fileParsed.base,
                     name: item,
                     path: filePath,
                     logicalPath: logicalPath,
                     homePath: path,
-                    metadata: itemMetadata
+                    metadata: itemMetadata,
+                    ...(embeddedThumbnail && {
+                        embeddedThumbnail
+                    })
                 });
             }
             else {

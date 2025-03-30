@@ -4,6 +4,8 @@ import { IListingItem, IListingItemDeleteRequest, IListingItemMoveRequest } from
 import { environment } from 'src/environments/environment';
 import { HttpService } from 'src/app/services/http/http.service';
 import * as moment from 'moment';
+import { Path } from 'src/models/path';
+import { IUploadAction, UploadType } from 'src/models/uploads';
 
 @Component({
     selector: 'app-grid-folder',
@@ -13,6 +15,7 @@ import * as moment from 'moment';
 export class GridFolderComponent implements OnInit {
 
     @Input() listingItem!: IListingItem;
+    @Output() onUploadClicked = new EventEmitter<IUploadAction>();
     @Output() onFolderClick = new EventEmitter<IFolder>();
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
@@ -101,5 +104,13 @@ export class GridFolderComponent implements OnInit {
     
     getLastOpenedAgo(): string {
         return moment(this.folder.metadata?.lastViewed).fromNow();
+    }
+
+    upload(event: MouseEvent): void {
+        this.onUploadClicked.emit({
+            path: this.folder.name,
+            type: UploadType.FOLDER_THUMBMAIL
+        });
+        event.stopPropagation();
     }
 }

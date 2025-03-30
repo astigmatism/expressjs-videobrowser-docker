@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { IListing } from 'src/models/listing';
 import { IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
+import { IUploadAction, UploadType } from 'src/models/uploads';
 import { Message, MessageType } from 'src/models/websockets';
 
 @Component({
@@ -21,7 +22,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     @Input() initialMessage!: string;
     @Output() onPathClicked = new EventEmitter<Path>();
     @Output() onLogoutClicked = new EventEmitter<Path>();
-    @Output() onUploadClicked = new EventEmitter<Path>();
+    @Output() onUploadClicked = new EventEmitter<IUploadAction>();
     @Output() onNewFolderClicked = new EventEmitter<Path>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
     @Output() onSortChanged = new EventEmitter<string>();
@@ -75,7 +76,7 @@ export class HeaderComponent implements OnInit, OnChanges {
     }
 
     upload(): void {
-        this.onUploadClicked.emit();
+        this.onUploadClicked.emit({ type: UploadType.MEDIA });
     }
     
     newFolder(): void {

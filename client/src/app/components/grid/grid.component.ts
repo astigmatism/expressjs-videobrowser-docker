@@ -7,6 +7,7 @@ import { Video } from 'src/models/video';
 import { IImage, Image } from 'src/models/image';
 import { Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
+import { IUploadAction, UploadType } from 'src/models/uploads';
 
 @Component({
     selector: 'app-grid',
@@ -22,6 +23,7 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy, OnChange
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
     @Output() onMoveCompleted = new EventEmitter<IListingItemMoveRequest>();
+    @Output() onUploadClicked = new EventEmitter<IUploadAction>();
     @ViewChild('container') container!: ElementRef;
     
     public columns = 0;
@@ -90,6 +92,10 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy, OnChange
     isImageListing(listingItem: IListingItem): boolean {
         if (listingItem instanceof Image) return true;
         return false;
+    }
+
+    uploadClicked(folderThumbnai: IUploadAction): void {
+        this.onUploadClicked.emit(folderThumbnai);
     }
 
     buildListitemBuckets(): void {

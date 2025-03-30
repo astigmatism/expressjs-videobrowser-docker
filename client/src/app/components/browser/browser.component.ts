@@ -10,6 +10,7 @@ import { IListing, Listing } from 'src/models/listing';
 import { IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
 import { ServerState } from 'src/models/server';
+import { UploadType, IUploadAction } from 'src/models/uploads';
 
 @Component({
     selector: 'app-browser',
@@ -30,6 +31,7 @@ export class BrowserComponent implements OnInit, AfterViewInit {
     public imageToOpenGallery!: IImage;
     public galleryActive = false;
     public uploadDialogActive = false;
+    public uploadAction: IUploadAction = { type: UploadType.MEDIA}
     public newFolderDialogActive = false;
     public initialServerState!: ServerState;
     public showFooter = false;
@@ -139,7 +141,15 @@ export class BrowserComponent implements OnInit, AfterViewInit {
         });
     }
 
-    upload(): void {
+    upload(upload: IUploadAction): void {
+        console.log('upload', upload)
+        
+        if (upload.path != null) {
+            upload.path = this.listing.path + upload.path
+        } else {
+            upload.path = this.listing.path
+        }
+        this.uploadAction = upload
         this.uploadDialogActive = true;
     }
 
