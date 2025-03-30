@@ -17,6 +17,16 @@ export class GridVideoComponent implements OnInit {
     @Input() listingItem!: IListingItem;
     @ViewChild('videoElement') videoElement!: ElementRef;
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
+
+    @HostListener('mouseleave')
+    onMouseLeaveComponent(): void {
+        if (this.scrubbingEnabledForThumbnail || this.scrubbingEnabledForPlay) {
+            this.scrubbingEnabledForThumbnail = false;
+            this.scrubbingEnabledForPlay = false;
+            this.toggleScrubbing(false);
+        }
+    }
+
     @HostListener('wheel', ['$event'])
     onMouseWheel(event: WheelEvent) {
         event.preventDefault(); // Prevent default browser zooming
@@ -91,6 +101,14 @@ export class GridVideoComponent implements OnInit {
     public showMetadata = false;
     public panPercent = 50;           // horizontal panning (left-right)
     public panVerticalPercent = 50;   // vertical panning (top-bottom)
+
+    private hoverTimer: any;
+    private spriteSequenceTimer: any;
+    private currentSpriteFrame = 0;
+    public spritePreviewIntervalMs = 500; // Adjustable delay between frames
+    public longHoverDelayMs = 1000;       // Time before playback starts
+    private originalBackgroundPositionX = 0;
+    private originalBackgroundPositionY = 0;
 
     constructor(private httpService: HttpService, private websocketService: WebsocketService) { }
 
@@ -252,10 +270,20 @@ export class GridVideoComponent implements OnInit {
 
     onMouseOver(event: MouseEvent): void {
         this.mouseOver = true;
+
+        // Only start long-hover sequence if we're over the preview image
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('preview')) {
+            this.hoverTimer = setTimeout(() => {
+                this.startSpriteSequence();
+            }, this.longHoverDelayMs);
+        }
     }
 
     onMouseOut(event: MouseEvent): void {
         this.mouseOver = false;
+        clearTimeout(this.hoverTimer);
+        this.stopSpriteSequence();
     }
 
     canShowDeleteIcon(): boolean {
@@ -347,5 +375,43 @@ export class GridVideoComponent implements OnInit {
     
     getLastOpenedAgo(): string {
         return moment(this.video.metadata?.lastViewed).fromNow();
+    }
+
+    private startSpriteSequence(): void {
+        if (!this.video.spriteSheet.coordinates?.length) return;
+    
+        // Save the original position so we can restore it later
+        this.originalBackgroundPositionX = this.backgroundPositionX;
+        this.originalBackgroundPositionY = this.backgroundPositionY;
+    
+        // Switch to sprite sheet image if not already scrubbing
+        if (!this.scrubbingEnabledForThumbnail && !this.scrubbingEnabledForPlay) {
+            this.previewImageUrl = environment.apis.httpServer + '/' + this.httpService.fixedEncodeURIComponent(this.video.spriteSheet.url);
+            this.maxHeight = 1000;
+        }
+    
+        this.spriteSequenceTimer = setInterval(() => {
+            const frame = this.video.spriteSheet.coordinates[this.currentSpriteFrame];
+            if (frame) {
+                this.backgroundPositionX = frame.x;
+                this.backgroundPositionY = frame.y;
+            }
+            this.currentSpriteFrame = (this.currentSpriteFrame + 1) % this.video.spriteSheet.coordinates.length;
+        }, this.spritePreviewIntervalMs);
+    }
+    
+    private stopSpriteSequence(): void {
+        clearInterval(this.spriteSequenceTimer);
+        this.currentSpriteFrame = 0;
+    
+        // Restore the original preview position
+        this.backgroundPositionX = this.originalBackgroundPositionX;
+        this.backgroundPositionY = this.originalBackgroundPositionY;
+    
+        // Optional: restore the previewImageUrl and maxHeight if needed
+        if (!this.scrubbingEnabledForThumbnail && !this.scrubbingEnabledForPlay) {
+            this.previewImageUrl = environment.apis.httpServer + '/' + this.httpService.fixedEncodeURIComponent(this.video.thumbnail.url);
+            this.maxHeight = environment.grid.previewMaxHeight;
+        }
     }
 }
