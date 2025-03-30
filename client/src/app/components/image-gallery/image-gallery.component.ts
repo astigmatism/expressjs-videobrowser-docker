@@ -61,17 +61,19 @@ export class ImageGalleryComponent implements OnInit {
     @HostListener('mouseup') onMouseUp() { this.isDragging = false; }
 
     @HostListener('mousemove', ['$event']) onMouseMove(event: MouseEvent) {
-        if (!this.isDragging) return;
-        this.showControls();
+        if (this.isDragging) {
+            const deltaX = event.clientX - this.lastMouseX;
+            const deltaY = event.clientY - this.lastMouseY;
 
-        const deltaX = event.clientX - this.lastMouseX;
-        const deltaY = event.clientY - this.lastMouseY;
+            this.imagePositionX += deltaX / this.imageScale;  // Adjust based on zoom level
+            this.imagePositionY += deltaY / this.imageScale;
 
-        this.imagePositionX += deltaX / this.imageScale;  // Adjust based on zoom level
-        this.imagePositionY += deltaY / this.imageScale;
-
-        this.lastMouseX = event.clientX;
-        this.lastMouseY = event.clientY;
+            this.lastMouseX = event.clientX;
+            this.lastMouseY = event.clientY;
+        }
+        else {
+            this.showControls();
+        }
     }
 
     @HostListener('window:keydown.f', ['$event']) toggleFitFill(event: KeyboardEvent) {
