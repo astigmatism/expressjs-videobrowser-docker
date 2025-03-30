@@ -20,11 +20,16 @@ export class GridVideoComponent implements OnInit {
 
     @HostListener('mouseleave')
     onMouseLeaveComponent(): void {
-        if (this.scrubbingEnabledForThumbnail || this.scrubbingEnabledForPlay) {
-            this.scrubbingEnabledForThumbnail = false;
-            this.scrubbingEnabledForPlay = false;
-            this.toggleScrubbing(false);
-        }
+        setTimeout(() => {
+            if (this.videoPlaying && !this.isFullScreen) {
+                this.videoPlaying = false
+            }
+            if (this.scrubbingEnabledForThumbnail || this.scrubbingEnabledForPlay) {
+                this.scrubbingEnabledForThumbnail = false;
+                this.scrubbingEnabledForPlay = false;
+                this.toggleScrubbing(false);
+            }
+        }, 1000)
     }
 
     @HostListener('wheel', ['$event'])
@@ -38,9 +43,21 @@ export class GridVideoComponent implements OnInit {
 
         this.applyZoom();
     }
-    @HostListener('document:fullscreenchange', [])
-    onFullscreenChange() {
-        if (!document.fullscreenElement) {
+
+    @HostListener('document:fullscreenchange')
+    @HostListener('document:webkitfullscreenchange')
+    @HostListener('document:mozfullscreenchange')
+    @HostListener('document:MSFullscreenChange')
+    onFullscreenChange(): void {
+        const fullscreenElement =
+            document.fullscreenElement ||
+            (document as any).webkitFullscreenElement ||
+            (document as any).mozFullScreenElement ||
+            (document as any).msFullscreenElement;
+
+        this.isFullScreen = !!fullscreenElement;
+
+        if (!fullscreenElement) {
             this.videoScale = 1; // Reset zoom on exit
             this.applyZoom();
         }
@@ -95,7 +112,7 @@ export class GridVideoComponent implements OnInit {
     private spriteSheetFrameRatio!: number;
     private startVideoAtTime = 0;
     private timeToFrameRatio!: number;
-    public isFullScreen = false;
+    public isFullScreen = !!document.fullscreenElement;
     public fillScreen = false;
     public videoScale = 1;
     public showMetadata = false;
@@ -106,7 +123,7 @@ export class GridVideoComponent implements OnInit {
     private spriteSequenceTimer: any;
     private currentSpriteFrame = 0;
     public spritePreviewIntervalMs = 500; // Adjustable delay between frames
-    public longHoverDelayMs = 1000;       // Time before playback starts
+    public longHoverDelayMs = 1200;       // Time before playback starts
     private originalBackgroundPositionX = 0;
     private originalBackgroundPositionY = 0;
 
@@ -172,13 +189,11 @@ export class GridVideoComponent implements OnInit {
             
             var playPromise = el.play();
 
+            console.log('playPromise', playPromise)
+
             if (playPromise !== undefined) {
                 playPromise.then((_:any) => {
-                    // Automatic playback started!
-                    // Show playing UI.
-                    if (el.requestFullscreen) {
-                        el.requestFullscreen();
-                    }
+                    // playback started!
                 })
                 .catch((error:Error) => {
                     // Auto-play was prevented
@@ -269,13 +284,17 @@ export class GridVideoComponent implements OnInit {
     }
 
     onMouseOver(event: MouseEvent): void {
+        if (this.scrubbingEnabledForThumbnail) return;
+        if (this.scrubbingEnabledForPlay) return;
         this.mouseOver = true;
 
         // Only start long-hover sequence if we're over the preview image
         const target = event.target as HTMLElement;
         if (target.classList.contains('preview')) {
             this.hoverTimer = setTimeout(() => {
-                this.startSpriteSequence();
+                // this.startSpriteSequence();
+                this.scrubbingEnabledForPlay = true;
+                this.toggleScrubbing(true);
             }, this.longHoverDelayMs);
         }
     }
@@ -283,7 +302,7 @@ export class GridVideoComponent implements OnInit {
     onMouseOut(event: MouseEvent): void {
         this.mouseOver = false;
         clearTimeout(this.hoverTimer);
-        this.stopSpriteSequence();
+        // this.stopSpriteSequence();
     }
 
     canShowDeleteIcon(): boolean {
@@ -342,22 +361,6 @@ export class GridVideoComponent implements OnInit {
         console.log(`📦 Drag started: ${this.video.name}`);
     }
 
-    toggleFullScreen(): void {
-        const videoContainer = this.videoElement.nativeElement.parentElement;
-    
-        if (!document.fullscreenElement) {
-            if (videoContainer.requestFullscreen) {
-                videoContainer.requestFullscreen();
-                this.isFullScreen = true;
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                this.isFullScreen = false;
-            }
-        }
-    }
-
     toggleFillScreen(): void {
         this.fillScreen = !this.fillScreen;
     }
@@ -379,8 +382,6 @@ export class GridVideoComponent implements OnInit {
 
     private startSpriteSequence(): void {
         if (!this.video.spriteSheet.coordinates?.length) return;
-        if (this.scrubbingEnabledForThumbnail) return;
-        if (this.scrubbingEnabledForPlay) return;
     
         // Save the original position so we can restore it later
         this.originalBackgroundPositionX = this.backgroundPositionX;
