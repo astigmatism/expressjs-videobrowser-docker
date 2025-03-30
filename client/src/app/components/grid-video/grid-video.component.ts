@@ -379,6 +379,8 @@ export class GridVideoComponent implements OnInit {
 
     private startSpriteSequence(): void {
         if (!this.video.spriteSheet.coordinates?.length) return;
+        if (this.scrubbingEnabledForThumbnail) return;
+        if (this.scrubbingEnabledForPlay) return;
     
         // Save the original position so we can restore it later
         this.originalBackgroundPositionX = this.backgroundPositionX;
