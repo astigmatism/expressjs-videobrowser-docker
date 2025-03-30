@@ -22,6 +22,7 @@ export class GridVideoComponent implements OnInit {
     onMouseLeaveComponent(): void {
         setTimeout(() => {
             if (this.videoPlaying && !this.isFullScreen) {
+                this.videoElement.nativeElement.pause();
                 this.videoPlaying = false
             }
             if (this.scrubbingEnabledForThumbnail || this.scrubbingEnabledForPlay) {
