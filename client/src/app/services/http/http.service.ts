@@ -85,6 +85,12 @@ export class HttpService {
         });
     }
 
+    removeFolderThumbnail(path: string): Observable<any> {
+        return this.httpClient.post<string>(this.httpServer + environment.apis.thumbnails.removeFolder, {
+            'path': path
+        });
+    }
+
     newFolder(path: string, name: string): Observable<any> {
         return this.httpClient.post<string>(this.httpServer + environment.apis.newFolder, {
             'path': path,

@@ -89,6 +89,13 @@ Router.post('/upload', isAuthorized, AsyncHandler(async (req, res, next) => {
     res.json({ message: 'Files uploaded successfully and processing started' });
 }));
 
+Router.post('/removeFolderThumbnail', isAuthorized, AsyncHandler(async (req, res, next) => {
+    
+    const path = req.body.path;
+    const result = await Application.removeFolderThumbnail(path);
+    res.json({ result });
+}));
+
 Router.post('/delete', isAuthorized, AsyncHandler(async (req, res, next) => {
     
     const path = req.body.path;

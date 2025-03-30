@@ -392,6 +392,29 @@ module.exports = new (function() {
         }
     };
 
+    this.removeFolderThumbnail = async(path) => {
+        const targetThumbFolder = Path.join(thumbnailsRoot, path);
+        console.log(targetThumbFolder)
+        const finalOutputPath = Path.join(targetThumbFolder, `_thumbnail.${Config.get('thumbnails.ext')}`);
+        console.log(finalOutputPath)
+    
+        try {
+            if (await Fse.pathExists(finalOutputPath)) {
+                await Fse.remove(finalOutputPath);
+                Log.INFO(`🗑️ Removed folder thumbnail at ${finalOutputPath}`);
+            } else {
+                Log.INFO(`No thumbnail found at ${finalOutputPath} to remove.`);
+            }
+    
+            const parentFolder = Path.join('/', Path.dirname(path));
+            DirectoryCache.invalidateCache(parentFolder);
+            return true;
+        } catch (err) {
+            Log.CRITICAL(`Failed to remove folder thumbnail: ${err.message}`);
+            return false;
+        }
+    }
+
     this.MediaDelete = async (path, name, isFolder) => {
 
         // turns our, fs-extra works when the name is a folder or a file :P

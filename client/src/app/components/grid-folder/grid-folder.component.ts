@@ -113,4 +113,12 @@ export class GridFolderComponent implements OnInit {
         });
         event.stopPropagation();
     }
+
+    removeIcon(event: MouseEvent): void {
+        const sub = this.httpService.removeFolderThumbnail(this.folder.logicalPath).subscribe(() => {
+            sub.unsubscribe();
+            location.reload();
+        });
+        event.stopPropagation();
+    }
 }

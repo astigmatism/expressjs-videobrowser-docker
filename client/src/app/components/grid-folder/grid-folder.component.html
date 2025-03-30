@@ -43,4 +43,11 @@
     >
         🖼️
     </div>
+    <div
+        [hidden]="!mouseOver"
+        class="remove-thumb-icon"
+        (click)="removeIcon($event)"
+    >
+    🚫
+    </div>
 </div>
