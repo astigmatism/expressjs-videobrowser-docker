@@ -145,7 +145,7 @@ export class BrowserComponent implements OnInit, AfterViewInit {
         console.log('upload', upload)
         
         if (upload.path != null) {
-            upload.path = this.listing.path + upload.path
+            upload.path = this.listing.path + (this.listing.path === '/' ? '' : '/') + upload.path
         } else {
             upload.path = this.listing.path
         }
