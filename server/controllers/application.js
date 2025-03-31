@@ -583,4 +583,78 @@ module.exports = new (function() {
             return false;
         }
     };
+
+    this.RenameResource = async (path, newName) => {
+        try {
+            const inputFolder = Path.join(mediaInputRoot, path);
+            const outputFolder = Path.join(mediaOutputRoot, path);
+            const thumbnailFolder = Path.join(thumbnailsRoot, path);
+    
+            const parsedNew = Path.parse(newName);
+            const parsedOld = Path.parse(path);
+    
+            const inputOld = Path.join(inputFolder, parsedOld.base);
+            const inputNew = Path.join(inputFolder, newName);
+            const outputOld = Path.join(outputFolder, parsedOld.base);
+            const outputNew = Path.join(outputFolder, newName);
+    
+            const thumbOld = Path.join(thumbnailFolder, parsedOld.name + '.' + Config.get('thumbnails.ext'));
+            const thumbNew = Path.join(thumbnailFolder, parsedNew.name + '.' + Config.get('thumbnails.ext'));
+    
+            const manifestOld = Path.join(thumbnailFolder, parsedOld.name + '.json');
+            const manifestNew = Path.join(thumbnailFolder, parsedNew.name + '.json');
+    
+            const sheetOld = Path.join(thumbnailFolder, parsedOld.name + '.sheet.' + Config.get('thumbnails.ext'));
+            const sheetNew = Path.join(thumbnailFolder, parsedNew.name + '.sheet.' + Config.get('thumbnails.ext'));
+    
+            // Prevent overwriting existing files
+            if (await Fse.pathExists(outputNew)) {
+                Log.CRITICAL(`❌ Rename target "${newName}" already exists in "${path}". Aborting.`);
+                return false;
+            }
+    
+            // Rename output files
+            if (await Fse.pathExists(outputOld)) {
+                await Fse.move(outputOld, outputNew);
+                Log.FILESYSTEM(`📂 Renamed output file to "${outputNew}"`);
+            }
+    
+            // Rename thumbnails if they exist
+            if (await Fse.pathExists(thumbOld)) {
+                await Fse.move(thumbOld, thumbNew);
+                Log.FILESYSTEM(`📂 Renamed thumbnail to "${thumbNew}"`);
+            }
+    
+            if (await Fse.pathExists(manifestOld)) {
+                await Fse.move(manifestOld, manifestNew);
+                Log.FILESYSTEM(`📂 Renamed thumbnail manifest to "${manifestNew}"`);
+            }
+    
+            if (await Fse.pathExists(sheetOld)) {
+                await Fse.move(sheetOld, sheetNew);
+                Log.FILESYSTEM(`📂 Renamed thumbnail sheet to "${sheetNew}"`);
+            }
+    
+            // Rename metadata entry if it exists
+            const metadata = await MetadataManager.loadMetadata(outputFolder);
+            if (metadata[parsedOld.base]) {
+                metadata[parsedNew.base] = metadata[parsedOld.base];
+                delete metadata[parsedOld.base];
+                MetadataManager.cache.set(path, metadata);
+                await MetadataManager.saveMetadata(outputFolder);
+                Log.FILESYSTEM(`📂 Renamed metadata entry to "${parsedNew.base}"`);
+            }
+
+            // ✅ Invalidate the parent folder's cache
+            const parentFolder = Path.join('/', Path.dirname(path));
+            DirectoryCache.invalidateCache(parentFolder);
+            Log.FILESYSTEM(`🧹 Invalidated cache for parent folder: ${parentFolder}`);
+
+    
+            return true;
+        } catch (error) {
+            Log.CRITICAL(`🔥 Error renaming resource in "${path}": ${error.message}`);
+            return false;
+        }
+    };
 });

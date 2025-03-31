@@ -126,6 +126,24 @@ Router.post('/newfolder', isAuthorized, AsyncHandler(async (req, res, next) => {
     res.json(folderCreated);
 }));
 
+Router.post('/renameResource', isAuthorized, AsyncHandler(async (req, res, next) => {
+    
+    const path = decodeURIComponent(req.body.path);
+    const newName = decodeURIComponent(req.body.newName)
+
+    await Application.ResourceRename(path, newName);
+
+    /*
+    const folderCreated = Application.CreateFolder(path, folderName);
+
+    if (folderCreated) {
+        DirectoryCache.invalidateCache(path); // ✅ Invalidate cache for the modified directory
+    }
+        */
+
+    res.json();
+}));
+
 Router.post('/move', isAuthorized, AsyncHandler(async (req, res, next) => {
     const { sourcePath, name, destinationPath, isFolder, operatingPath } = req.body;
 

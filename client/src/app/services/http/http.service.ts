@@ -98,6 +98,13 @@ export class HttpService {
         });
     }
 
+    renameResource(path: string, newName: string): Observable<any> {
+        return this.httpClient.post<string>(this.httpServer + environment.apis.renameResource, {
+            'path': path,
+            'newName': newName
+        });
+    }
+
     /**
      * 🔥 Move a resource (folder, image, or video) to a new location.
      * @param droppedItem The dragged resource containing details (`name`, `path`, `type`).

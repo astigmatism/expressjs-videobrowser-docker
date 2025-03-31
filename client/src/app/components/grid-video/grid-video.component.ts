@@ -6,6 +6,7 @@ import { ISetThumbnailData } from 'src/models/thumbnail';
 import { IVideo, Video } from 'src/models/video';
 import * as moment from 'moment';
 import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
+import { InputModalConfig } from 'src/models/input-model';
 
 @Component({
     selector: 'app-grid-video',
@@ -17,6 +18,7 @@ export class GridVideoComponent implements OnInit {
     @Input() listingItem!: IListingItem;
     @ViewChild('videoElement') videoElement!: ElementRef;
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
+    @Output() onRenameClickedRequest = new EventEmitter<InputModalConfig>();
 
     @HostListener('mouseleave')
     onMouseLeaveComponent(): void {
@@ -270,6 +272,22 @@ export class GridVideoComponent implements OnInit {
 
         this.scrubbingEnabledForPlay = true;
         this.toggleScrubbing(true);
+    }
+
+    onRenameClick(event: MouseEvent): void {
+        console.log('video', this.video)
+        this.onRenameClickedRequest.emit({
+            label: 'New Name',
+            defaultValue: this.video.name,
+            buttonLabel: 'Rename',
+            emoji: '✏️',
+            onSubmit: (value: string) => {
+                const sub = this.httpService.renameResource(this.video.logicalPath, value).subscribe(() => {
+                    sub.unsubscribe();
+                    location.reload();
+                });
+            }
+        });
     }
 
     onMouseMove(event: MouseEvent): void {

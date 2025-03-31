@@ -6,6 +6,7 @@ import { HttpService } from 'src/app/services/http/http.service';
 import * as moment from 'moment';
 import { Path } from 'src/models/path';
 import { IUploadAction, UploadType } from 'src/models/uploads';
+import { InputModalConfig } from 'src/models/input-model';
 
 @Component({
     selector: 'app-grid-folder',
@@ -19,6 +20,7 @@ export class GridFolderComponent implements OnInit {
     @Output() onFolderClick = new EventEmitter<IFolder>();
     @Output() onDeleteRequest = new EventEmitter<IListingItemDeleteRequest>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
+    @Output() onRenameClickedRequest = new EventEmitter<InputModalConfig>();
 
     public folder!: IFolder;
     public mouseOver = false;
@@ -120,5 +122,20 @@ export class GridFolderComponent implements OnInit {
             location.reload();
         });
         event.stopPropagation();
+    }
+
+    onRenameClick(event: MouseEvent): void {
+        this.onRenameClickedRequest.emit({
+            label: 'New Name',
+            placeholder: '',
+            buttonLabel: 'Rename',
+            emoji: '📁',
+            onSubmit: (value: string) => {
+                const sub = this.httpService.renameResource(this.folder.logicalPath, value).subscribe(() => {
+                    sub.unsubscribe();
+                    location.reload();
+                });
+            }
+        });
     }
 }

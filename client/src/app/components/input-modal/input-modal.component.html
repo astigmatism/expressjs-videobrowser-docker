@@ -1,0 +1,13 @@
+<div class="input-modal" (click)="onBackgroundClick($event)">
+    <div class="dialog" (click)="onDialogClick($event)">
+        <div class="content">
+            <label>{{ config.emoji || '' }} {{ config.label || 'Enter Value:' }}</label>
+            <input
+                #inputElement
+                [placeholder]="config.placeholder || ''"
+                [value]="config.defaultValue || ''"
+                (keydown)="onKeyDown($event)" />
+            <button (click)="submit()">{{ config.buttonLabel || 'Submit' }}</button>
+        </div>
+    </div>
+</div>

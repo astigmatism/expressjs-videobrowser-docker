@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpService } from 'src/app/services/http/http.service';
 
@@ -7,13 +7,20 @@ import { HttpService } from 'src/app/services/http/http.service';
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
 
     @ViewChild('password') password!: ElementRef;
 
     constructor(private httpService: HttpService, private router: Router) { }
 
     ngOnInit(): void {
+    }
+
+    ngAfterViewInit(): void {
+        // Wait until the view is fully initialized before focusing
+        setTimeout(() => {
+            this.password.nativeElement.focus();
+        });
     }
 
     onClick(): void {

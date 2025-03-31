@@ -22,7 +22,8 @@ export const environment = {
     uploads: '/upload',
     deleteMedia: '/delete',
     newFolder: '/newfolder',
-    moveResource: '/move'
+    moveResource: '/move',
+    renameResource: '/renameResource'
   },
   application: {
     showUpload: true,

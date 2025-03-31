@@ -18,6 +18,7 @@ import { UploadComponent } from './components/upload/upload.component';
 import { NewFolderComponent } from './components/new-folder/new-folder.component';
 import { WebsocketService } from './services/web-sockets/web-sockets.service';
 import { ServerLogDialogComponent } from './components/server-log-dialog/server-log-dialog.component';
+import { InputModalComponent } from './components/input-modal/input-modal.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { ServerLogDialogComponent } from './components/server-log-dialog/server-
     LoginComponent,
     UploadComponent,
     NewFolderComponent,
-    ServerLogDialogComponent
+    ServerLogDialogComponent,
+    InputModalComponent
   ],
   imports: [
     AppRoutingModule,

@@ -1,11 +1,12 @@
 <div *ngIf="listing; else loading">
     <app-header 
         [path]="listing.path"
+        [currentPath]="currentPath"
         [sortOption]="currentSort"
         (onPathClicked)="pathClicked($event)"
         (onLogoutClicked)="logout()"
         (onUploadClicked)="upload($event)"
-        (onNewFolderClicked)="newFolder()"
+        (onNewFolderClicked)="openInputModal($event)"
         (onMoveRequest)="onMoveRequest($event)"
         (onSortChanged)="handleSortChanged($event)"
     ></app-header>
@@ -17,6 +18,7 @@
         (onImageClick)="imageClicked($event)"
         (onDeleteRequest)="onDeleteRequest($event)"
         (onMoveRequest)="onMoveRequest($event)"
+        (onRenameClickedRequest)="openInputModal($event)"
     >
     </app-grid>
     <app-footer *ngIf="showFooter"></app-footer>
@@ -30,10 +32,11 @@
         [uploadAction]="uploadAction"
         (closeUploadRequest)="onUploadClose()"
     ></app-upload>
-    <app-new-folder *ngIf="newFolderDialogActive"
-        (onNewFolderRequest)="onNewFolderRequest($event)"
-        (closeNewFolderRequest)="onNewFolderClose()"
-    ></app-new-folder>
+    <app-input-modal
+        *ngIf="showInputModal"
+        [config]="inputModalConfig"
+        (onClose)="showInputModal = false">
+</app-input-modal>
 </div>
 <ng-template #loading>
     <div class="loading">

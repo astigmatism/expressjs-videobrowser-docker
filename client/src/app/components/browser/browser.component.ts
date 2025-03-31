@@ -6,6 +6,7 @@ import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.servi
 import { environment } from 'src/environments/environment';
 import { IFolder } from 'src/models/folder';
 import { IImage, Image as xImage } from 'src/models/image';
+import { InputModalConfig } from 'src/models/input-model';
 import { IListing, Listing } from 'src/models/listing';
 import { IListingItemDeleteRequest, IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
@@ -26,13 +27,14 @@ export class BrowserComponent implements OnInit, AfterViewInit {
 
     public listing!: IListing;
     public movedItem: IListingItemMoveRequest | null = null;
-    private currentPath!: string;
+    public currentPath!: string;
     private subscriptions: Subscription[] = [];
     public imageToOpenGallery!: IImage;
     public galleryActive = false;
     public uploadDialogActive = false;
     public uploadAction: IUploadAction = { type: UploadType.MEDIA}
-    public newFolderDialogActive = false;
+    public showInputModal = false;
+    public inputModalConfig: InputModalConfig = {}
     public initialServerState!: ServerState;
     public showFooter = false;
     public currentSort: string | undefined = undefined
@@ -155,20 +157,13 @@ export class BrowserComponent implements OnInit, AfterViewInit {
         this.uploadDialogActive = false;
     }
 
-    newFolder(): void {
-        this.newFolderDialogActive = true;
+    openInputModal(config: InputModalConfig) {
+        this.inputModalConfig = config
+        this.showInputModal = true;
     }
 
     onNewFolderClose(): void {
-        this.newFolderDialogActive = false;
-    }
-
-    onNewFolderRequest(name: string): void {
-        this.newFolderDialogActive = false;
-        const sub = this.httpService.newFolder(this.currentPath, name).subscribe(() => {
-            sub.unsubscribe();
-            location.reload();
-        });
+        this.showInputModal = false;
     }
 
     onDeleteRequest(request: IListingItemDeleteRequest): void {

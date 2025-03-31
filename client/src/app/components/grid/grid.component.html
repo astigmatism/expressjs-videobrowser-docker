@@ -10,17 +10,20 @@
                         (onDeleteRequest)="deleteRequest($event)"
                         (onMoveRequest)="moveRequest($event)"
                         (onUploadClicked)="uploadClicked($event)"
+                        (onRenameClickedRequest)="renameClicked($event)"
                     ></app-grid-folder>
                     <app-grid-video 
                         *ngIf="isVideoListing(listingItem)" 
                         [listingItem]="listingItem"
                         (onDeleteRequest)="deleteRequest($event)"
+                        (onRenameClickedRequest)="renameClicked($event)"
                     ></app-grid-video>
                     <app-grid-image 
                         *ngIf="isImageListing(listingItem)" 
                         [listingItem]="listingItem"
                         (onImageClick)="imageClicked($event)"
                         (onDeleteRequest)="deleteRequest($event)"
+                        (onRenameClickedRequest)="renameClicked($event)"
                     ></app-grid-image>
                 </div>
             </ng-container>

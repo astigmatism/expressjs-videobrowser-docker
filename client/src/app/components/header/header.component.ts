@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { HttpService } from 'src/app/services/http/http.service';
 import { WebsocketService } from 'src/app/services/web-sockets/web-sockets.service';
 import { environment } from 'src/environments/environment';
+import { InputModalConfig } from 'src/models/input-model';
 import { IListing } from 'src/models/listing';
 import { IListingItemMoveRequest } from 'src/models/listing-item';
 import { Path } from 'src/models/path';
@@ -18,12 +19,13 @@ export class HeaderComponent implements OnInit, OnChanges {
     @Input() set path (listingPath: string) {
         this.paths = Path.buildPathsFromListing(listingPath);
     }
+    @Input() currentPath: string | undefined;
     @Input() sortOption: string | undefined;
     @Input() initialMessage!: string;
     @Output() onPathClicked = new EventEmitter<Path>();
     @Output() onLogoutClicked = new EventEmitter<Path>();
     @Output() onUploadClicked = new EventEmitter<IUploadAction>();
-    @Output() onNewFolderClicked = new EventEmitter<Path>();
+    @Output() onNewFolderClicked = new EventEmitter<InputModalConfig>();
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
     @Output() onSortChanged = new EventEmitter<string>();
 
@@ -65,8 +67,8 @@ export class HeaderComponent implements OnInit, OnChanges {
 
     processFilesOnServer(): void {
         
-        this.httpService.processFilesOnServer().subscribe(() => {
-
+        const sub = this.httpService.processFilesOnServer().subscribe(() => {
+            sub.unsubscribe()
         });
     }
 
@@ -80,7 +82,20 @@ export class HeaderComponent implements OnInit, OnChanges {
     }
     
     newFolder(): void {
-        this.onNewFolderClicked.emit();
+        this.onNewFolderClicked.emit({
+            label: 'New Folder Name',
+            placeholder: '',
+            buttonLabel: 'Create',
+            emoji: '📁',
+            onSubmit: (value: string) => {
+                if (this.currentPath != null) {
+                    const sub = this.httpService.newFolder(this.currentPath, value).subscribe(() => {
+                        sub.unsubscribe();
+                        location.reload();
+                    });
+                }
+            }
+        });
     }
 
     toggleSettingsDropdown(): void {

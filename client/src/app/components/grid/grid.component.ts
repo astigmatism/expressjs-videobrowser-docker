@@ -8,6 +8,7 @@ import { IImage, Image } from 'src/models/image';
 import { Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
 import { IUploadAction, UploadType } from 'src/models/uploads';
+import { InputModalConfig } from 'src/models/input-model';
 
 @Component({
     selector: 'app-grid',
@@ -24,6 +25,7 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy, OnChange
     @Output() onMoveRequest = new EventEmitter<IListingItemMoveRequest>();
     @Output() onMoveCompleted = new EventEmitter<IListingItemMoveRequest>();
     @Output() onUploadClicked = new EventEmitter<IUploadAction>();
+    @Output() onRenameClickedRequest = new EventEmitter<InputModalConfig>();
     @ViewChild('container') container!: ElementRef;
     
     public columns = 0;
@@ -119,5 +121,9 @@ export class GridComponent implements OnInit, AfterViewInit, OnDestroy, OnChange
         for (const item of videoAndImagesListings) {
             this.bucketedListingItems[currentBucket++ % this.columns].push(item);
         }
+    }
+
+    renameClicked(config: InputModalConfig) {
+        this.onRenameClickedRequest.emit(config);
     }
 }
