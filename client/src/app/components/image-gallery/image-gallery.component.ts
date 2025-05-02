@@ -116,6 +116,18 @@ export class ImageGalleryComponent implements OnInit {
         this.setGalleryImage();
     }
 
+    private preloadNextImages(): void {
+        const preloadCount = 2; // Preload next 2 images
+        for (let i = 1; i <= preloadCount; i++) {
+            const index = (this.currentImageIndex + i) % this.images.length;
+            const nextImage = this.images[index];
+            const url = environment.apis.httpServer + '/' + nextImage.url;
+    
+            const img = new Image();
+            img.src = url;
+        }
+    }
+
     closeGallery(): void {
         clearInterval(this.slideShowInterval);
         clearTimeout(this.countdownTimerToHideControls);
@@ -129,6 +141,7 @@ export class ImageGalleryComponent implements OnInit {
         this.imagePositionY = 0;
         this.imageUrl = environment.apis.httpServer + '/' + image.url;
         this.updateImageDisplay();
+        this.preloadNextImages();
 
         this.websocketService.sendMetadataUpdate([{
             action: 'increment',
