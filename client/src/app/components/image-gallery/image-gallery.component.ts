@@ -12,10 +12,18 @@ export class ImageGalleryComponent implements OnInit {
     @Input() path!: string;
     @Input() images!: IImage[];
     @Input() set showImage(image: IImage) {
-        if (!image || !this.images?.length) return;
-        // Save current image's state before jumping
+        if (!image) return;
+        // If images not ready yet, try on next tick
+        if (!this.images?.length) {
+            queueMicrotask(() => {
+            if (!this.images?.length) return; // still not ready
+            this.currentImageIndex = Math.max(0, this.images.findIndex(i => i.name === image.name));
+            this.setGalleryImage();
+            });
+            return;
+        }
         this.saveCurrentViewState();
-        const idx = this.images.findIndex((item: IImage) => item.name === image.name);
+        const idx = this.images.findIndex(i => i.name === image.name);
         this.currentImageIndex = idx >= 0 ? idx : 0;
         this.setGalleryImage();
     }
@@ -174,6 +182,11 @@ export class ImageGalleryComponent implements OnInit {
         this.saveCurrentViewState();
         this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
         this.setGalleryImage();
+    }
+
+    public get bgImage(): string {
+    // Encode to keep spaces and specials safe; wrap in quotes for CSS
+    return this.imageUrl ? `url("${encodeURI(this.imageUrl)}")` : 'none';
     }
 
     private preloadNextImages(): void {

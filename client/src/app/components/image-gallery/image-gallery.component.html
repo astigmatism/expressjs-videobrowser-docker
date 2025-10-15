@@ -3,10 +3,10 @@
         class="image"
         #imageContainer
         [ngStyle]="{
-        'background-image': 'url(' + imageUrl + ')',
         'background-size': bgSize,
         'background-position': bgPosition
         }"
+        [style.background-image]="bgImage"
     ></div>
 
     <div class="controls" [hidden]="hideControls">
