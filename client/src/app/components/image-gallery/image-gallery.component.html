@@ -2,11 +2,11 @@
     <div
         class="image"
         #imageContainer
-        [ngStyle]="{
-        'background-size': bgSize,
-        'background-position': bgPosition
-        }"
         [style.background-image]="bgImage"
+        [ngStyle]="{
+            'background-size': bgSize,
+            'background-position': bgPosition
+        }"
     ></div>
 
     <div class="controls" [hidden]="hideControls">

@@ -16,9 +16,9 @@ export class ImageGalleryComponent implements OnInit {
         // If images not ready yet, try on next tick
         if (!this.images?.length) {
             queueMicrotask(() => {
-            if (!this.images?.length) return; // still not ready
-            this.currentImageIndex = Math.max(0, this.images.findIndex(i => i.name === image.name));
-            this.setGalleryImage();
+                if (!this.images?.length) return; // still not ready
+                this.currentImageIndex = Math.max(0, this.images.findIndex(i => i.name === image.name));
+                this.setGalleryImage();
             });
             return;
         }
@@ -141,6 +141,12 @@ export class ImageGalleryComponent implements OnInit {
         return `calc(50% + ${this.panX}px) calc(50% + ${this.panY}px)`;
     }
 
+    // Quoted + encoded background-image value
+    public get bgImage(): string {
+        // imageUrl is already encoded via buildImageUrl; quoting keeps CSS safe
+        return this.imageUrl ? `url("${this.imageUrl}")` : 'none';
+    }
+
     // ===== Private impl state =====
     private isDragging = false;
     private lastMouseX = 0;
@@ -184,18 +190,13 @@ export class ImageGalleryComponent implements OnInit {
         this.setGalleryImage();
     }
 
-    public get bgImage(): string {
-    // Encode to keep spaces and specials safe; wrap in quotes for CSS
-    return this.imageUrl ? `url("${encodeURI(this.imageUrl)}")` : 'none';
-    }
-
     private preloadNextImages(): void {
         if (!this.images?.length) return;
         const preloadCount = 2;
         for (let i = 1; i <= preloadCount; i++) {
             const index = (this.currentImageIndex + i) % this.images.length;
             const nextImage = this.images[index];
-            const url = environment.apis.httpServer + '/' + nextImage.url;
+            const url = this.buildImageUrl(nextImage.url); // ENCODED
             const img = new Image();
             img.src = url;
         }
@@ -223,7 +224,8 @@ export class ImageGalleryComponent implements OnInit {
         this.panX = 0;
         this.panY = 0;
 
-        this.imageUrl = environment.apis.httpServer + '/' + image.url;
+        // Build a fully encoded URL that preserves query/hash
+        this.imageUrl = this.buildImageUrl(image.url);
 
         // Load intrinsic size to compute base scaling
         const probe = new Image();
@@ -355,6 +357,19 @@ export class ImageGalleryComponent implements OnInit {
         this.computeBaseScale(); // recompute baseScale (fit/fill) for current container + image
         // After resetting, persist this as the new state for this mode/image
         this.saveCurrentViewState();
+    }
+
+    // ===== URL builder: encode path segments, preserve query/hash =====
+    private buildImageUrl(rawPath: string): string {
+        const base = (environment.apis.httpServer || '').replace(/\/+$/, '');
+        if (!rawPath) return base; // fallback (shouldn't happen; avoids undefined)
+        // Separate path from ?query and #hash
+        const match = rawPath.match(/^([^?#]*)(.*)$/);
+        const pathPart = (match?.[1] || '').replace(/^\/+/, '');      // strip leading slashes
+        const tail = match?.[2] || '';                                 // includes ?... or #... if present
+        // Encode each path segment (so spaces, parentheses, etc. are safe)
+        const encodedPath = pathPart.split('/').map(seg => encodeURIComponent(seg)).join('/');
+        return `${base}/${encodedPath}${tail}`;
     }
 
     // ===== Session persistence: per-image, per-mode =====
