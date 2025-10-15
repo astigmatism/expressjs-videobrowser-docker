@@ -192,6 +192,10 @@ export class ImageGalleryComponent implements OnInit {
     closeGallery(): void {
         clearInterval(this.slideShowInterval);
         clearTimeout(this.countdownTimerToHideControls);
+
+        // NEW: clear all persisted view state when exiting gallery (Q or X)
+        this.clearAllViewState();
+
         this.closeGalleryRequest.emit();
     }
 
@@ -389,6 +393,19 @@ export class ImageGalleryComponent implements OnInit {
             this.viewStateByKey.clear();
             Object.entries(obj).forEach(([k, v]) => this.viewStateByKey.set(k, v));
         } catch { /* ignore parse errors */ }
+    }
+
+    // NEW: clear all in-memory and session-stored view state
+    private clearAllViewState(): void {
+        try {
+            this.viewStateByKey.clear();
+            sessionStorage.removeItem(this.storageKey);
+        } catch { /* ignore */ }
+
+        // Also reset current runtime view so a future open starts clean
+        this.userScale = 1;
+        this.panX = 0;
+        this.panY = 0;
     }
 }
 
