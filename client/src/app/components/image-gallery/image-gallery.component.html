@@ -1,32 +1,35 @@
 <div class="image-gallery">
-    <div 
-        class="image" 
+    <div
+        class="image"
         #imageContainer
-        [ngStyle]="{ 
-            'background-image': 'url(\'' + imageUrl + '\')',
-            'transform': 'scale(' + imageScale + ') translate(' + imagePositionX + 'px, ' + imagePositionY + 'px)',
-            'background-position': 'center'
-        }">
-    </div>
+        [ngStyle]="{
+        'background-image': 'url(' + imageUrl + ')',
+        'background-size': bgSize,
+        'background-position': bgPosition
+        }"
+    ></div>
+
     <div class="controls" [hidden]="hideControls">
         <div *ngIf="showImageLegend" class="legend">
-            <ul>
-                <li>Right: Next Image</li>
-                <li>Left: Previous Image</li>
-                <li>Space: Stop/Start Slideshow</li>
-                <li>Up: Speedup Slideshow</li>
-                <li>Down: Slowdown Slideshow</li>
-                <li>Q: Quit Gallery View</li>
-                <li>F: Toggle Fit and Fill Image</li>
-                <li>Scroll: Zoom</li>
-                <li>Click & Drag: Pan</li>
-            </ul>
+        <ul>
+            <li>Right: Next Image</li>
+            <li>Left: Previous Image</li>
+            <li>Space: Stop/Start Slideshow</li>
+            <li>Up: Speedup Slideshow</li>
+            <li>Down: Slowdown Slideshow</li>
+            <li>Q: Quit Gallery View</li>
+            <li>F: Toggle Fit and Fill Image</li>
+            <li>Scroll: Zoom</li>
+            <li>Click &amp; Drag: Pan</li>
+        </ul>
         </div>
+
         <div class="close-button noselect" (click)="closeGallery()">&#215;</div>
         <div class="navigation-button left-button noselect" (click)="previousImage()">&laquo;</div>
         <div class="navigation-button right-button noselect" (click)="nextImage()">&raquo;</div>
+
         <div class="slideshow-button noselect" (click)="toggleSlideShow()">
-            {{ slideShowActive ? 'Stop Slideshow' : 'Start Slideshow'}} ({{ slideShowIntervalInMilliseconds/1000 }}s)
+        {{ (slideShowActive ? 'Stop Slideshow' : 'Start Slideshow') + ' (' + (slideShowIntervalInMilliseconds/1000) + 's)' }}
         </div>
     </div>
 </div>

@@ -4,25 +4,25 @@ div.image-gallery {
     left: 0px;
     height: 100%;
     width: 100%;
-    
-    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#b5bdc8+0,828c95+36,28343b+100;Grey+Black+3D */
-    background: rgb(181,189,200); /* Old browsers */
-    background: -moz-radial-gradient(center, ellipse cover,  rgba(181,189,200,1) 0%, rgba(130,140,149,1) 36%, rgba(40,52,59,1) 100%); /* FF3.6-15 */
-    background: -webkit-radial-gradient(center, ellipse cover,  rgba(181,189,200,1) 0%,rgba(130,140,149,1) 36%,rgba(40,52,59,1) 100%); /* Chrome10-25,Safari5.1-6 */
-    background: radial-gradient(ellipse at center,  rgba(181,189,200,1) 0%,rgba(130,140,149,1) 36%,rgba(40,52,59,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b5bdc8', endColorstr='#28343b',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 
+    /* Existing gradient background */
+    background: rgb(181,189,200);
+    background: -moz-radial-gradient(center, ellipse cover, rgba(181,189,200,1) 0%, rgba(130,140,149,1) 36%, rgba(40,52,59,1) 100%);
+    background: -webkit-radial-gradient(center, ellipse cover, rgba(181,189,200,1) 0%,rgba(130,140,149,1) 36%,rgba(40,52,59,1) 100%);
+    background: radial-gradient(ellipse at center, rgba(181,189,200,1) 0%,rgba(130,140,149,1) 36%,rgba(40,52,59,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#b5bdc8', endColorstr='#28343b', GradientType=1);
 
     .image {
         width: 100%;
         height: 100%;
         background-repeat: no-repeat;
-        background-size: contain;
+        background-position: center; // TS will override with bgPosition
+        // IMPORTANT: Do NOT set background-size here; TS controls it
+        // (removes the contain/cover clash with zoom)
     }
 
-    .image.fill-mode {
-        background-size: cover; /* Toggle mode */
-    }
+    // Optional hook if you want to style fill mode differently (no sizing here)
+    .image.fill-mode { }
 
     div.close-button {
         position: absolute;
@@ -76,16 +76,18 @@ div.image-gallery {
         cursor: pointer;
         padding: 10px;
         color: white;
+        transform: translateX(-50%);
+        white-space: nowrap;
     }
 
     .legend {
         position: absolute;
-        top:0px;
+        top: 0px;
         left: 0px;
         background-color: black;
         opacity: 0.5;
         border-radius: 3px;
-        cursor: pointer;
+        cursor: default;
         padding: 5px;
         color: white;
         font-size: 14px;
